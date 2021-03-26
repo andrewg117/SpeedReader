@@ -1,0 +1,58 @@
+$previewBackColor: lightgray;
+$mainBackColor: #0a0a10;
+$widthChange: 900px;
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: $mainBackColor;
+  line-height: 1.5em;
+}
+
+
+#mark-container {
+  width: 95vw;
+  height: 95vh;
+  margin: 2em auto;
+  display: grid;
+  // Changes the grid direction when the window width reaches 900px  
+  @media (min-width: $widthChange) {
+    grid-template-columns: 1fr 2fr;
+    grid-column-gap: 1.5em;
+  }
+  
+  @media (max-width: $widthChange) {
+    grid-template-rows: 1fr 1fr;
+    grid-row-gap: 1.5em;
+  }
+  #editor {
+    font-size: 1.5em;
+    resize: none;
+    padding: 1em;
+  }
+  #preview {
+    display: flex;
+    flex-wrap: wrap; 
+    align-content: flex-start;
+    // gap: 1em;
+    
+    padding: 1em;
+    background-color: $previewBackColor; 
+    overflow: scroll;
+    
+    #textBlock {
+      font-size: 20px;
+      margin: 0 .8em .2em 0;
+      &:hover {
+        padding: .1em;
+        color: white;
+        background: $mainBackColor;
+      }
+    }
+    .isActive {
+      padding: .1em;
+      color: white;
+      background: $mainBackColor;
+    }
+  }
+}
