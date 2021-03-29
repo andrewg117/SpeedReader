@@ -10,14 +10,14 @@ body {
 }
 
 
-#mark-container {
+#main-container {
   width: 95vw;
   height: 95vh;
   margin: 2em auto;
   display: grid;
   // Changes the grid direction when the window width reaches 900px  
   @media (min-width: $widthChange) {
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-column-gap: 1.5em;
   }
   
@@ -54,5 +54,12 @@ body {
       color: white;
       background: $mainBackColor;
     }
+  }
+  
+  #block-view {
+    background-color: $previewBackColor; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }

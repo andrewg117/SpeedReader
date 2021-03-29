@@ -1,12 +1,17 @@
-const defaultText = 'Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time .Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course change over time.';
+const defaultText = 'Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time.';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+    
+    this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    
     this.state = {
       text: defaultText,
-      blockGroup: []
+      blockGroup: [],
+      currentBlock: 0,
+      displayText: 'Load Text'
     };
   }
   
@@ -18,7 +23,15 @@ class App extends React.Component {
           key={index}
           text={text}
           />
-      ))
+      )),
+      displayText: this.state.blockGroup[this.state.currentBlock].props.text
+    });
+  }
+  
+  
+  handleClick(id, value) {
+    this.setState({
+      displayText: value
     });
   }
   
@@ -34,20 +47,27 @@ class App extends React.Component {
         <Block 
           key={index}
           text={text}
+          handleClick={this.handleClick}
           />
       ))
+      // displayText: this.state.blockGroup[this.state.currentBlock].props.text
     });
   }
   
   render() {
+    
+    
     return (
-      <div id="mark-container">
+      <div id="main-container">
         <textarea
           id="editor"
           onChange={this.handleChange}
           value={this.state.text}
         />
-        <div id="preview">{this.state.blockGroup}</div>
+        <section id="preview">{this.state.blockGroup}</section>
+        <section id="block-view">
+          <h1>{this.state.displayText}</h1>
+        </section>
       </div>
       )
   }
@@ -63,9 +83,11 @@ class Block extends React.Component {
   }
   
   // will change to selecting only one at a time
-  handleClick() {
+  handleClick(e) {
+    this.props.handleClick(this.props.key, this.props.text);
+    
     this.setState({
-      isSelected: !this.state.isSelected
+      isSelected: true
     });
   }
   
