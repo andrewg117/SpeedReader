@@ -5,12 +5,13 @@
 > Goal is to create a interactive speed reader that takes text input and shows the output. 
 > The output will be both full and single word. 
 
-
-Coming Next:
-
+___
+### Coming Next:
+```
 TODO: Create menu with user controls(start, pause, reset, speed, etc.)
 TODO: Create timer that selects the next word block
 TODO: Create word speed algorithm (words per second, words per block)
 TODO: Allow user to select word block to start from
 TODO: Highlight one block at a time
 TODO: Allow previews to toggle fullscreen 
+```
