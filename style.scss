@@ -6,31 +6,38 @@ body {
   margin: 0;
   padding: 0;
   background-color: $mainBackColor;
-  line-height: 1.5em;
 }
 
 
 #main-container {
   width: 95vw;
-  height: 95vh;
+  height: 80vh;
   margin: 2em auto;
-  display: grid;
-  // Changes the grid direction when the window width reaches 900px  
-  @media (min-width: $widthChange) {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-column-gap: 1.5em;
-  }
+  padding: 1em;
+  border: 1px solid white;
   
-  @media (max-width: $widthChange) {
-    grid-template-rows: 1fr 1fr;
-    grid-row-gap: 1.5em;
-  }
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto;
+  grid-template-areas: 
+    "editor editor"
+    "preview block"
+    "input input";
+  grid-column-gap: 1em;
+  grid-row-gap: 1em;
+  
+  // @media (max-width: $widthChange) {
+  //   grid-template-rows: 1fr 1fr;
+  //   grid-row-gap: 1.5em;
+  // }
   #editor {
+    grid-area: editor;
     font-size: 1.5em;
     resize: none;
     padding: 1em;
   }
   #preview {
+    grid-area: preview;
     display: flex;
     flex-wrap: wrap; 
     align-content: flex-start;
@@ -57,9 +64,30 @@ body {
   }
   
   #block-view {
+    grid-area: block;
     background-color: $previewBackColor; 
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  
+  #input-view {
+    grid-area: input; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    
+    width: 50%;
+    padding: 1em;
+    border: 1px solid white;
+    justify-self: center;
+    // text-align: center;
+    
+    button {
+      // padding: .4em;
+      // border: none;
+      font-size: 1.4em;
+    }
   }
 }
