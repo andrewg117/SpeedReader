@@ -7,6 +7,7 @@ class App extends React.Component {
 
     this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.resetReader = this.resetReader.bind(this);
 
     this.state = {
       text: defaultText,
@@ -17,32 +18,53 @@ class App extends React.Component {
   }
 
   handleChange(e) {
-    this.setState({
-      text: e.target.value,
-      blockGroup: this.convetText().map((text, index) => (
-        <Block key={index} text={text} />
-      )),
-      displayText: this.state.blockGroup[this.state.currentBlock].props.text
+    this.setState((state) => {
+      return {
+        text: e.target.value,
+        currentBlock: 0,
+        blockGroup: this.convetText(state.currentBlock),
+        displayText: state.blockGroup[state.currentBlock].props.text
+      }
     });
   }
 
   handleClick(id, value) {
-    this.setState({
-      displayText: value
+        console.log(`${id}`);
+    this.setState((state) => {
+      return {
+        displayText: value,
+        currentBlock: id,
+        blockGroup: this.convetText(id)
+      }
     });
   }
 
-  convetText() {
+  convetText(selectedID) {
     const arr = this.state.text.split(" ");
-    return arr;
+    const newArr = arr.map((text, i) => {
+      if(selectedID == i){
+        return <Block key={i} id={i} text={text} handleClick={this.handleClick} isSelected={true} />
+      }
+        return <Block key={i} id={i} text={text} handleClick={this.handleClick} isSelected={false} />
+      }
+    );
+    return newArr;
+  }
+  
+  resetReader() {
+    this.setState({
+      text: defaultText,
+      currentBlock: 0,
+      displayText: "Load Text",
+      blockGroup: this.convetText(0)
+    });
   }
 
   componentDidMount() {
-    this.setState({
-      blockGroup: this.convetText().map((text, index) => (
-        <Block key={index} text={text} handleClick={this.handleClick} />
-      ))
-      // displayText: this.state.blockGroup[this.state.currentBlock].props.text
+    this.setState((state) => {
+      return {
+        blockGroup: this.convetText(state.currentBlock)
+      }
     });
   }
 
@@ -60,7 +82,7 @@ class App extends React.Component {
         </section>
         <section id="input-view">
           <button className="btn btn-light">Start</button>
-          <button className="btn btn-light">Reset</button>
+          <button className="btn btn-light" onClick={this.resetReader}>Reset</button>
           
           {/*  <div className="dropdown">
             <button
@@ -86,25 +108,25 @@ class Block extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
-    this.state = {
-      isSelected: false
-    };
+    // this.state = {
+    //   isSelected: false
+    // };
   }
 
   // will change to selecting only one at a time
   handleClick(e) {
-    this.props.handleClick(this.props.key, this.props.text);
+    this.props.handleClick(this.props.id, this.props.text);
 
-    this.setState({
-      isSelected: true
-    });
+    // this.setState({
+    //   isSelected: true
+    // });
   }
 
   render() {
     return (
       <div
         id="textBlock"
-        className={this.state.isSelected ? "isActive" : ""}
+        className={this.props.isSelected ? "isActive" : ""}
         onClick={this.handleClick}
       >
         {this.props.text}
