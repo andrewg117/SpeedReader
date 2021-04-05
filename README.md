@@ -12,6 +12,7 @@ TODO: Create menu with user controls(start, pause, reset, speed, etc.)
 TODO: Create timer that selects the next word block
 TODO: Create word speed algorithm (words per second, words per block)
 TODO: Allow user to select word block to start from
-COMPLETE: Highlight one block at a time
 TODO: Allow previews to toggle fullscreen 
+COMPLETE: Highlight one block at a time
+COMPLETE: Allow user to change the word block size
 ```
