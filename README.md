@@ -12,7 +12,7 @@ COMPLETE: Create menu with user controls(start, pause, reset, speed, etc.)
 COMPLETE: Create timer that selects the next word block
 REVIEW: Create word speed algorithm (words per second, words per block)
 COMPLETE: Allow user to select word block to start from
-TODO: Allow previews to toggle fullscreen 
+COMPLETE: Allow previews to toggle fullscreen 
 COMPLETE: Highlight one block at a time
 COMPLETE: Allow user to change the word block size
 TODO: Clean-up code

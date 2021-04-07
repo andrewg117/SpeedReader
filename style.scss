@@ -6,58 +6,95 @@ body {
   margin: 0;
   padding: 0;
   background-color: $mainBackColor;
+    
+  i {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: .5em;
+    font-size: 1.5em;
+    opacity: 0.5;
+  }
 }
 
-
 #main-container {
-  width: 95vw;
+  width: 90vw;
   height: 80vh;
+  min-height: 600px;
   margin: 2em auto;
   padding: 1em;
-  border: 1px solid white;
-  
+  // border: 1px solid white;
+
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto;
-  grid-template-areas: 
-    "editor editor"
-    "preview block"
-    "input input";
-  grid-column-gap: 1em;
-  grid-row-gap: 1em;
-  
-  // @media (max-width: $widthChange) {
-  //   grid-template-rows: 1fr 1fr;
-  //   grid-row-gap: 1.5em;
-  // }
+  @media (min-width: $widthChange) {
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "editor editor"
+      "preview block"
+      "input input";
+    grid-column-gap: 1em;
+    grid-row-gap: 1em;
+  }
+
+  @media (max-width: $widthChange) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "editor"
+      "preview"
+      "block"
+      "input";
+    grid-row-gap: 1em;
+
+    #block-view {
+      h1 {
+        font-size: 0.8em;
+      }
+    }
+  }
+
   #editor {
     grid-area: editor;
     font-size: 1.5em;
     resize: none;
-    padding: 1em;
+    padding: 0.5em;
+    min-height: 300px;
   }
+  
+  .fullScreen {
+    position: fixed;
+    top: 0;
+    margin: 2em auto;
+    width: 90vw;
+    height: 80vh;
+    z-index: 10;
+  }
+  .normal {
+    position: relative;
+  }
+  
   #preview {
     grid-area: preview;
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-content: flex-start;
-    // gap: 1em;
-    
+    min-height: 300px;
     padding: 1em;
-    background-color: $previewBackColor; 
+    background-color: $previewBackColor;
     overflow: scroll;
-    
+
     #textBlock {
-      font-size: 20px;
-      margin: 0 .8em .2em 0;
+      font-size: 1.3em;
+      margin: 0 0.5em 0.2em 0;
       &:hover {
-        padding: .1em;
+        padding: 0.1em;
         color: white;
         background: $mainBackColor;
       }
     }
     .isActive {
-      padding: .1em;
+      padding: 0.1em;
       color: white;
       background: $mainBackColor;
     }
@@ -65,29 +102,33 @@ body {
   
   #block-view {
     grid-area: block;
-    background-color: $previewBackColor; 
+    background-color: $previewBackColor;
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  
-  #input-view {
-    grid-area: input; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1em;
-    
-    width: 50%;
-    padding: 1em;
-    border: 1px solid white;
-    justify-self: center;
-    // text-align: center;
-    
-    button {
-      // padding: .4em;
-      // border: none;
-      font-size: 1.4em;
+    p {
+      font-size: 3em;
+    }
+    @media (max-width: $widthChange) {
+      padding: 2em;
+      p {
+        font-size: 2em;
+      }
     }
   }
+
+  #input-view {
+    grid-area: input;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8em;
+
+    button {
+      font-weight: bold;
+    }
+  }
+  
+  
 }
