@@ -32,6 +32,7 @@ body {
     grid-template-areas:
       "editor editor"
       "preview block"
+      "count count"
       "input input";
     grid-column-gap: 1em;
     grid-row-gap: 1em;
@@ -44,6 +45,7 @@ body {
       "editor"
       "preview"
       "block"
+      "count"
       "input";
     grid-row-gap: 1em;
 
@@ -115,6 +117,13 @@ body {
         font-size: 2em;
       }
     }
+  }
+  
+  #wordCount {
+    grid-area: count;
+    color: white; 
+    text-align: center;
+    font-size: 1.5em;
   }
 
   #input-view {

@@ -1,5 +1,5 @@
 const defaultText =
-  "Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time. Default text to use in the project. It will, of course, change over time.";
+  "Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time.";
 
 class App extends React.Component {
   constructor(props) {
@@ -25,7 +25,8 @@ class App extends React.Component {
       isStarted: false,
       wpmSpeed: 100,
       fullPreview: false,
-      fullBlock: false
+      fullBlock: false,
+      wordCount: 0
     };
   }
 
@@ -42,6 +43,7 @@ class App extends React.Component {
         blockMenuOpen: false
       };
     });
+    this.wordCounter();
   }
 
   handleClick(id, value) {
@@ -95,6 +97,9 @@ class App extends React.Component {
 
   calcWPM(wpm, block) {
     // this is a temp calculation of WPM using the js timer.. still researching
+    /* 
+      After testing using timestamps in the startReader function, it seems to be 2 seconds off. This could be due to the delay at the start. I'll work on reducing the startup time.
+    */
     const temp = (60 / wpm) * 1000 * block;
     return temp;
   }
@@ -114,6 +119,9 @@ class App extends React.Component {
       wpmMenuOpen: false,
       blockMenuOpen: false
     });
+    
+    let startStamp = new Date();
+    console.log(`Start: ${startStamp.toString()}`);
 
     let timer = setInterval(() => {
       const {
@@ -132,6 +140,8 @@ class App extends React.Component {
           blockGroup: this.convetText(nextBlock, text)
         });
       } else {
+        let endStamp = new Date();
+        console.log(`End: ${endStamp.toString()}`);
         clearInterval(timer);
       }
     }, this.calcWPM(wpmSpeed, wordsPerBlock));
@@ -149,6 +159,7 @@ class App extends React.Component {
         blockMenuOpen: false
       };
     });
+    this.wordCounter();
   }
 
   openBlockMenu() {
@@ -209,6 +220,14 @@ class App extends React.Component {
       })
     }
   }
+  
+  wordCounter() {
+    this.setState((state) => {
+      return {
+        wordCount: state.blockGroup.length
+      };
+    });
+  }
 
   componentDidMount() {
     this.setState((state) => {
@@ -216,6 +235,7 @@ class App extends React.Component {
         blockGroup: this.convetText(state.currentBlock, state.text)
       };
     });
+    this.wordCounter();
   }
   
   componentWillUnmount() {
@@ -237,6 +257,7 @@ class App extends React.Component {
       fullPreview,
       fullBlock
     } = this.state;
+    
     return (
       <div id="main-container">
         <textarea id="editor" onChange={this.handleChange} value={text} />
@@ -250,6 +271,7 @@ class App extends React.Component {
           <p>{displayText}</p>
           <i id="fullBlock" className="fas fa-expand" onClick={this.toggleFullScreen}></i>
         </section>
+        <div id="wordCount">{`Word Count: ${this.state.wordCount}`}</div>
         <section id="input-view">
           <button className="btn btn-light" onClick={this.startReader}>
             {isStarted ? "Pause" : "Start"}
@@ -290,7 +312,7 @@ class App extends React.Component {
               data-toggle="dropdown"
               onClick={this.openWPMMenu}
             >
-              WMP {`(${wpmSpeed})`}
+              WPM {`(${wpmSpeed})`}
             </button>
             <ul className={`dropdown-menu${wpmMenuOpen ? " show" : ""}`}>
               <li className="dropdown-item" onClick={this.wpmSelector}>
