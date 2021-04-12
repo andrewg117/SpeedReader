@@ -13,6 +13,10 @@ class App extends React.Component {
     this.blockSizer = this.blockSizer.bind(this);
     this.wpmSelector = this.wpmSelector.bind(this);
     this.toggleFullScreen = this.toggleFullScreen.bind(this);
+    this.timeoutTimer = this.timeoutTimer.bind(this);
+    
+    this.currentTime;
+    this.nextTime;
 
     this.state = {
       text: defaultText,
@@ -95,21 +99,63 @@ class App extends React.Component {
     return newArr;
   }
 
-  calcWPM(wpm, block) {
-    // this is a temp calculation of WPM using the js timer.. still researching
-    /* 
+  // this is a temp calculation of WPM using the js timer.. still researching
+  /* 
       After testing using timestamps in the startReader function, it seems to be 2 seconds off. This could be due to the delay at the start. I'll work on reducing the startup time.
-    */
-    const temp = (60 / wpm) * 1000 * block;
-    return temp;
+
+      After researching, I found that both setTimeout and setInterval accuracy drifts increasingly every interval. I decided to use setTimeout's recursive solution to solve the drift.
+      REF:  https://www.sitepoint.com/creating-accurate-timers-in-javascript/ by James Edwards
+            https://stackoverflow.com/questions/8173580/setinterval-timing-slowly-drifts-away-from-staying-accurate by Alex Wayne
+  */
+  calcWPM(wpm, block) {
+    const calc = (60 / wpm) * 1000 * block;
+    return calc;
   }
 
-  startReader() {
+  timeoutTimer() {
     const {
       isStarted,
       currentBlock,
       blockGroup,
       text,
+      wpmSpeed,
+      wordsPerBlock
+    } = this.state;
+    
+    if(isStarted) {
+      if(!this.currentTime) {
+          this.currentTime = new Date().getTime();
+          this.nextTime = this.currentTime;
+        }
+      this.nextTime += this.calcWPM(wpmSpeed, wordsPerBlock);
+    
+      const nextBlock = currentBlock + 1;
+
+      if (nextBlock < blockGroup.length) {
+        this.setState({
+          displayText: blockGroup[nextBlock].props.text,
+          currentBlock: nextBlock,
+          blockGroup: this.convetText(nextBlock, text)
+        });
+
+        setTimeout(this.timeoutTimer, this.nextTime - new Date().getTime());
+      } else {
+        let endStamp = new Date();
+        console.log(`End: ${endStamp.toString()}`);
+        clearTimeout(this.timeoutTimer);
+        this.currentTime = 0;
+        this.nextTime = 0;
+      }
+    } else {
+        clearTimeout(this.timeoutTimer);
+        this.currentTime = 0;
+        this.nextTime = 0;
+    }
+  }
+
+  startReader() {
+    const {
+      isStarted,
       wpmSpeed,
       wordsPerBlock
     } = this.state;
@@ -123,13 +169,16 @@ class App extends React.Component {
     let startStamp = new Date();
     console.log(`Start: ${startStamp.toString()}`);
 
-    let timer = setInterval(() => {
+    this.currentTime = 0;
+    this.nextTime = 0;
+    setTimeout(this.timeoutTimer, this.calcWPM(wpmSpeed, wordsPerBlock));
+
+    /* let timer = setInterval(() => {
       const {
         isStarted,
         currentBlock,
         blockGroup,
-        text,
-        wpmSpeed
+        text
       } = this.state;
       const nextBlock = currentBlock + 1;
 
@@ -144,7 +193,7 @@ class App extends React.Component {
         console.log(`End: ${endStamp.toString()}`);
         clearInterval(timer);
       }
-    }, this.calcWPM(wpmSpeed, wordsPerBlock));
+    }, this.calcWPM(wpmSpeed, wordsPerBlock)); */
   }
 
   resetReader() {
@@ -160,6 +209,9 @@ class App extends React.Component {
       };
     });
     this.wordCounter();
+    clearTimeout(this.timeoutTimer);
+    this.currentTime = 0;
+    this.nextTime = 0;
   }
 
   openBlockMenu() {
@@ -193,6 +245,9 @@ class App extends React.Component {
         wpmSpeed: state.wpmSpeed
       };
     });
+    clearTimeout(this.timeoutTimer);
+    this.currentTime = 0;
+    this.nextTime = 0;
   }
 
   wpmSelector(e) {
@@ -206,6 +261,9 @@ class App extends React.Component {
         wpmSpeed: parseInt(e.target.innerText)
       };
     });
+    clearTimeout(this.timeoutTimer);
+    this.currentTime = 0;
+    this.nextTime = 0;
   }
   
   toggleFullScreen (e) {
@@ -242,6 +300,8 @@ class App extends React.Component {
     this.setState({
       blockGroup: []
     });
+    
+    clearTimeout(this.timeoutTimer);
   }
 
   render() {
