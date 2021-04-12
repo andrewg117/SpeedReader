@@ -10,7 +10,7 @@ ___
 ```
 COMPLETE: Create menu with user controls(start, pause, reset, speed, etc.)
 COMPLETE: Create timer that selects the next word block
-REVIEW: Create word speed algorithm (words per second, words per block) Update: After testing start and end timestamps, there is a slight delay on the startup time.
+FIXED: Create word speed algorithm (words per second, words per block) Update: After testing start and end timestamps, there is a slight delay on the startup time.
 COMPLETE: Allow user to select word block to start from
 COMPLETE: Allow previews to toggle fullscreen 
 COMPLETE: Highlight one block at a time
