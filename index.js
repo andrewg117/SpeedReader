@@ -35,19 +35,19 @@ class App extends React.Component {
   }
 
   handleChange(e) {
-    e.preventDefault();
     this.setState((state) => {
       return {
         text: e.target.value,
         currentBlock: 0,
-        blockGroup: this.convetText(state.currentBlock, state.text),
-        displayText: state.blockGroup[state.currentBlock].props.text,
+        displayText: state.blockGroup[0].props.text,
+        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
       };
     });
     this.wordCounter();
+    this.resetTime();
   }
 
   handleClick(id, value) {
@@ -55,18 +55,19 @@ class App extends React.Component {
       return {
         displayText: value,
         currentBlock: id,
-        blockGroup: this.convetText(id, state.text),
+        blockGroup: this.convertText(id, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
       };
     });
+    this.resetTime();
   }
 
-  convetText(selectedID, text) {
+  convertText(selectedID, text, wordsPerBlock) {
     const arr = text.split(/\s/);
     let temp = [];
-    let wordLen = this.state.wordsPerBlock;
+    let wordLen = wordsPerBlock;
 
     for (let i = 0; i < arr.length; i += wordLen) {
       if (arr[i] !== "") {
@@ -135,21 +136,20 @@ class App extends React.Component {
         this.setState({
           displayText: blockGroup[nextBlock].props.text,
           currentBlock: nextBlock,
-          blockGroup: this.convetText(nextBlock, text)
+          blockGroup: this.convertText(nextBlock, text, wordsPerBlock)
         });
 
         setTimeout(this.timeoutTimer, this.nextTime - new Date().getTime());
       } else {
         let endStamp = new Date();
         console.log(`End: ${endStamp.toString()}`);
-        clearTimeout(this.timeoutTimer);
-        this.currentTime = 0;
-        this.nextTime = 0;
+        this.setState({
+          isStarted: false
+        });
+        this.resetTime();
       }
     } else {
-        clearTimeout(this.timeoutTimer);
-        this.currentTime = 0;
-        this.nextTime = 0;
+      this.resetTime();
     }
   }
 
@@ -169,8 +169,7 @@ class App extends React.Component {
     let startStamp = new Date();
     console.log(`Start: ${startStamp.toString()}`);
 
-    this.currentTime = 0;
-    this.nextTime = 0;
+    this.resetTime();
     setTimeout(this.timeoutTimer, this.calcWPM(wpmSpeed, wordsPerBlock));
 
     /* let timer = setInterval(() => {
@@ -178,7 +177,8 @@ class App extends React.Component {
         isStarted,
         currentBlock,
         blockGroup,
-        text
+        text, 
+        wordsPerBlock
       } = this.state;
       const nextBlock = currentBlock + 1;
 
@@ -186,7 +186,7 @@ class App extends React.Component {
         this.setState({
           displayText: blockGroup[nextBlock].props.text,
           currentBlock: nextBlock,
-          blockGroup: this.convetText(nextBlock, text)
+          blockGroup: this.convertText(nextBlock, text, wordsPerBlock)
         });
       } else {
         let endStamp = new Date();
@@ -202,16 +202,14 @@ class App extends React.Component {
         // text: defaultText,
         currentBlock: 0,
         displayText: state.blockGroup[0].props.text,
-        blockGroup: this.convetText(0, state.text),
+        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
       };
     });
     this.wordCounter();
-    clearTimeout(this.timeoutTimer);
-    this.currentTime = 0;
-    this.nextTime = 0;
+    this.resetTime();
   }
 
   openBlockMenu() {
@@ -234,20 +232,19 @@ class App extends React.Component {
 
   blockSizer(e) {
     this.setState((state) => {
+      const blocks = this.convertText(0, state.text, parseInt(e.target.innerText));
       return {
         wpmMenuOpen: false,
         blockMenuOpen: false,
         wordsPerBlock: parseInt(e.target.innerText),
         currentBlock: 0,
-        blockGroup: this.convetText(0, state.text),
-        displayText: state.blockGroup[0].props.text,
+        blockGroup: blocks,
+        displayText: blocks[0].props.text,
         isStarted: false,
         wpmSpeed: state.wpmSpeed
       };
     });
-    clearTimeout(this.timeoutTimer);
-    this.currentTime = 0;
-    this.nextTime = 0;
+    this.resetTime();
   }
 
   wpmSelector(e) {
@@ -255,15 +252,13 @@ class App extends React.Component {
       return {
         wpmMenuOpen: false,
         currentBlock: 0,
-        blockGroup: this.convetText(0, state.text),
+        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
         displayText: state.blockGroup[0].props.text,
         isStarted: false,
         wpmSpeed: parseInt(e.target.innerText)
       };
     });
-    clearTimeout(this.timeoutTimer);
-    this.currentTime = 0;
-    this.nextTime = 0;
+    this.resetTime();
   }
   
   toggleFullScreen (e) {
@@ -281,16 +276,30 @@ class App extends React.Component {
   
   wordCounter() {
     this.setState((state) => {
+      const arr = state.text.split(/\s/);
+      let newArr = [];
+      
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== "") {
+          newArr.push(arr[i]);
+        }
+      }
       return {
-        wordCount: state.blockGroup.length
+        wordCount: newArr.length
       };
     });
+  }
+  
+  resetTime() {
+    clearTimeout(this.timeoutTimer);
+    this.currentTime = 0;
+    this.nextTime = 0;
   }
 
   componentDidMount() {
     this.setState((state) => {
       return {
-        blockGroup: this.convetText(state.currentBlock, state.text)
+        blockGroup: this.convertText(state.currentBlock, state.text, state.wordsPerBlock)
       };
     });
     this.wordCounter();
@@ -301,7 +310,7 @@ class App extends React.Component {
       blockGroup: []
     });
     
-    clearTimeout(this.timeoutTimer);
+    this.resetTime();
   }
 
   render() {
@@ -321,18 +330,22 @@ class App extends React.Component {
     return (
       <div id="main-container">
         <textarea id="editor" onChange={this.handleChange} value={text} />
+        
         <section id="preview"  className={fullPreview ? "fullScreen": "normal"}>
           {blockGroup}
           <div>
             <i id="fullPreview" className={"fas fa-expand"} onClick={this.toggleFullScreen}></i>
           </div>
         </section>
+        
         <section id="block-view" className={fullBlock ? "fullScreen": "normal"}>
           <p>{displayText}</p>
           <i id="fullBlock" className="fas fa-expand" onClick={this.toggleFullScreen}></i>
         </section>
+        
         <div id="wordCount">{`Word Count: ${this.state.wordCount}`}</div>
-        <section id="input-view">
+        
+        <section id="input-view" className={(fullPreview || fullBlock) ? "lower": ""}>
           <button className="btn btn-light" onClick={this.startReader}>
             {isStarted ? "Pause" : "Start"}
           </button>
@@ -340,7 +353,7 @@ class App extends React.Component {
             Reset
           </button>
 
-          <div className="dropdown">
+          <div className="dropup">
             <button
               className="btn btn-light dropdown-toggle"
               type="button"
@@ -365,7 +378,7 @@ class App extends React.Component {
             </ul>
           </div>
 
-          <div className="dropdown">
+          <div className="dropup">
             <button
               className="btn btn-light dropdown-toggle"
               type="button"

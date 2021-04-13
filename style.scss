@@ -1,4 +1,4 @@
-$previewBackColor: lightgray;
+$previewBackColor: #e9e9f5;
 $mainBackColor: #0a0a10;
 $widthChange: 900px;
 
@@ -67,10 +67,13 @@ body {
   .fullScreen {
     position: fixed;
     top: 0;
-    margin: 2em auto;
+    margin: 1em auto;
     width: 90vw;
     height: 80vh;
     z-index: 10;
+    @media (max-width: $widthChange) {
+      height: 75vh;
+    }
   }
   .normal {
     position: relative;
@@ -85,6 +88,11 @@ body {
     padding: 1em;
     background-color: $previewBackColor;
     overflow: scroll;
+    -ms-overflow-style: none;  
+    scrollbar-width: none; 
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     #textBlock {
       font-size: 1.3em;
@@ -114,7 +122,7 @@ body {
     @media (max-width: $widthChange) {
       padding: 2em;
       p {
-        font-size: 2em;
+        font-size: 1.5em;
       }
     }
   }
@@ -126,17 +134,31 @@ body {
     font-size: 1.5em;
   }
 
+  
+  
   #input-view {
     grid-area: input;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 0.8em;
+    margin: 1em;
+    // gap: 0.8em;
 
     button {
       font-weight: bold;
+      margin: 0 .8em .8em 0;
     }
+  }
+  .lower {
+    position: fixed;
+    bottom: 0;
+    width: 90vw;
+    // justify-self: center;
+    justify-content: center;
+    padding: 1em;
+    z-index: 40;
+    background-color: $mainBackColor;
   }
   
   
