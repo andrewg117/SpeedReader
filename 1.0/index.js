@@ -1,6 +1,7 @@
 const defaultText =
   "Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time.";
 
+// main component class
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -34,6 +35,7 @@ class App extends React.Component {
     };
   }
 
+  // handles the value input from the editor and update the text and other state properties
   handleChange(e) {
     this.setState((state) => {
       return {
@@ -50,6 +52,7 @@ class App extends React.Component {
     this.resetTime();
   }
 
+  // changes the display text and selected block to the block selected by the user in the preview element
   handleClick(id, value) {
     this.setState((state) => {
       return {
@@ -64,6 +67,7 @@ class App extends React.Component {
     this.resetTime();
   }
 
+  // converts the editor text to a list of Block components
   convertText(selectedID, text, wordsPerBlock) {
     const arr = text.split(/\s/);
     let temp = [];
@@ -100,19 +104,13 @@ class App extends React.Component {
     return newArr;
   }
 
-  // this is a temp calculation of WPM using the js timer.. still researching
-  /* 
-      After testing using timestamps in the startReader function, it seems to be 2 seconds off. This could be due to the delay at the start. I'll work on reducing the startup time.
-
-      After researching, I found that both setTimeout and setInterval accuracy drifts increasingly every interval. I decided to use setTimeout's recursive solution to solve the drift.
-      REF:  https://www.sitepoint.com/creating-accurate-timers-in-javascript/ by James Edwards
-            https://stackoverflow.com/questions/8173580/setinterval-timing-slowly-drifts-away-from-staying-accurate by Alex Wayne
-  */
+  // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown 
   calcWPM(wpm, block) {
     const calc = (60 / wpm) * 1000 * block;
     return calc;
   }
 
+  // timer used to increment through the block list 
   timeoutTimer() {
     const {
       isStarted,
@@ -153,6 +151,7 @@ class App extends React.Component {
     }
   }
 
+  // starts the timeoutTimer function and changes the isStarted state
   startReader() {
     const {
       isStarted,
@@ -196,6 +195,7 @@ class App extends React.Component {
     }, this.calcWPM(wpmSpeed, wordsPerBlock)); */
   }
 
+  // resets the App to default values
   resetReader() {
     this.setState((state) => {
       return {
@@ -212,6 +212,7 @@ class App extends React.Component {
     this.resetTime();
   }
 
+  // opens the Block Size dropdown
   openBlockMenu() {
     this.setState((state) => {
       return {
@@ -221,6 +222,7 @@ class App extends React.Component {
     });
   }
 
+  // opens the WPM dropdown
   openWPMMenu() {
     this.setState((state) => {
       return {
@@ -230,6 +232,7 @@ class App extends React.Component {
     });
   }
 
+  // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
   blockSizer(e) {
     this.setState((state) => {
       const blocks = this.convertText(0, state.text, parseInt(e.target.innerText));
@@ -247,6 +250,7 @@ class App extends React.Component {
     this.resetTime();
   }
 
+  // changes the state of the wpmSpeed value when an option in the WPM dropdown is selected 
   wpmSelector(e) {
     this.setState((state) => {
       return {
@@ -261,6 +265,7 @@ class App extends React.Component {
     this.resetTime();
   }
   
+  // toggles the fullscreen state of the preview or block view
   toggleFullScreen (e) {
     // console.log(e.target.id);
     if(e.target.id == 'fullBlock') {
@@ -274,6 +279,7 @@ class App extends React.Component {
     }
   }
   
+  // counts the number of words in the current text state
   wordCounter() {
     this.setState((state) => {
       const arr = state.text.split(/\s/);
@@ -290,12 +296,14 @@ class App extends React.Component {
     });
   }
   
+  // clears the timeout timer and resets it's time values
   resetTime() {
     clearTimeout(this.timeoutTimer);
     this.currentTime = 0;
     this.nextTime = 0;
   }
 
+  // initializes the state for the Block list
   componentDidMount() {
     this.setState((state) => {
       return {
@@ -305,6 +313,7 @@ class App extends React.Component {
     this.wordCounter();
   }
   
+  // clears the Block list
   componentWillUnmount() {
     this.setState({
       blockGroup: []
@@ -408,6 +417,7 @@ class App extends React.Component {
   }
 }
 
+// component that renders each word block
 const Block = (props) => {
   const handleClick = () => {
     props.handleClick(props.id, props.text);
