@@ -321,75 +321,59 @@ class App extends React.Component {
           text={text} 
          />
         
-        <section id="preview"  className={fullPreview ? "fullScreen": "normal"}>
-          {blockGroup}
-          <div>
-            <i id="fullPreview" className={"fas fa-expand"} onClick={this.toggleFullScreen}></i>
-          </div>
-        </section>
+        <TextPreview 
+          sectionID={"preview"} 
+          textBlocks={blockGroup} 
+          isFullScreen={fullPreview} 
+          toggler={this.toggleFullScreen} 
+        />
         
-        <section id="block-view" className={fullBlock ? "fullScreen": "normal"}>
-          <p>{displayText}</p>
-          <i id="fullBlock" className="fas fa-expand" onClick={this.toggleFullScreen}></i>
-        </section>
+        <BlockView 
+          sectionID={"block-view"} 
+          displayText={displayText}
+          isFullScreen={fullBlock} 
+          toggler={this.toggleFullScreen} 
+        />
         
         <WordCounter text={text} />
         
         <section id="input-view" className={(fullPreview || fullBlock) ? "lower": ""}>
-          <button className="btn btn-light" onClick={this.startReader}>
-            {isStarted ? "Pause" : "Start"}
-          </button>
-          <button className="btn btn-light" onClick={this.resetReader}>
-            Reset
-          </button>
+          <InputButton 
+            className={"btn btn-light"}
+            readerControl={this.startReader} 
+            btnText={isStarted ? "Pause" : "Start"} 
+          />
+          <InputButton 
+            className={"btn btn-light"}
+            readerControl={this.resetReader} 
+            btnText={"Reset"} 
+          />
 
           <div className="dropup">
-            <button
-              className="btn btn-light dropdown-toggle"
-              type="button"
-              data-toggle="dropdown"
-              onClick={this.openBlockMenu}
-            >
-              Block Size {`(${wordsPerBlock})`}
-            </button>
+            <InputButton 
+              className={"btn btn-light dropdown-toggle"}
+              readerControl={this.openBlockMenu} 
+              btnText={`Block Size (${wordsPerBlock})`} 
+            />
             <ul className={`dropdown-menu${blockMenuOpen ? " show" : ""}`}>
-              <li className="dropdown-item" onClick={this.blockSizer}>
-                1
-              </li>
-              <li className="dropdown-item" onClick={this.blockSizer}>
-                2
-              </li>
-              <li className="dropdown-item" onClick={this.blockSizer}>
-                3
-              </li>
-              <li className="dropdown-item" onClick={this.blockSizer}>
-                4
-              </li>
+              <DropdownOption selector={this.blockSizer} value={1} />
+              <DropdownOption selector={this.blockSizer} value={2} />
+              <DropdownOption selector={this.blockSizer} value={3} />
+              <DropdownOption selector={this.blockSizer} value={4} />
             </ul>
           </div>
 
           <div className="dropup">
-            <button
-              className="btn btn-light dropdown-toggle"
-              type="button"
-              data-toggle="dropdown"
-              onClick={this.openWPMMenu}
-            >
-              WPM {`(${wpmSpeed})`}
-            </button>
+            <InputButton 
+              className={"btn btn-light dropdown-toggle"}
+              readerControl={this.openWPMMenu} 
+              btnText={`WPM (${wpmSpeed})`} 
+            />
             <ul className={`dropdown-menu${wpmMenuOpen ? " show" : ""}`}>
-              <li className="dropdown-item" onClick={this.wpmSelector}>
-                100
-              </li>
-              <li className="dropdown-item" onClick={this.wpmSelector}>
-                200
-              </li>
-              <li className="dropdown-item" onClick={this.wpmSelector}>
-                300
-              </li>
-              <li className="dropdown-item" onClick={this.wpmSelector}>
-                400
-              </li>
+              <DropdownOption selector={this.wpmSelector} value={100} />
+              <DropdownOption selector={this.wpmSelector} value={200} />
+              <DropdownOption selector={this.wpmSelector} value={300} />
+              <DropdownOption selector={this.wpmSelector} value={400} />
             </ul>
           </div>
         </section>
@@ -425,10 +409,28 @@ const Block = (props) => {
   );
 };
 
-// need to get the toggle state from main class
+const TextPreview = (props) => {
+  return(
+    <section id={props.sectionID}  className={props.isFullScreen ? "fullScreen": "normal"}>
+      {props.textBlocks}
+      <FullScreenToggler iconID={"fullPreview"} toggler={props.toggler} />
+    </section>
+  );
+}
+
+
+const BlockView = (props) => {
+  return(
+    <section id={props.sectionID} className={props.isFullScreen ? "fullScreen": "normal"}>
+      <p>{props.displayText}</p>
+      <FullScreenToggler iconID={"fullBlock"} toggler={props.toggler} />
+    </section>
+  );
+}
+
 const FullScreenToggler = (props) => {
   return (
-    <i id="fullBlock" className="fas fa-expand" onClick={this.toggleFullScreen}></i>
+    <i id={props.iconID} className="fas fa-expand" onClick={props.toggler}></i>
   );
 }
 
@@ -448,6 +450,23 @@ const WordCounter = (props) => {
   
   return(
     <div id="wordCount">{`Word Count: ${wordCounter(props.text)}`}</div>
+  );
+}
+
+
+const InputButton = (props) => {
+  return(
+    <button className={props.className} onClick={props.readerControl}>
+      {props.btnText}
+    </button>
+  );
+}
+
+const DropdownOption = (props) => {
+  return(
+    <li className="dropdown-item" onClick={props.selector}>
+      {props.value}
+    </li>
   );
 }
 
