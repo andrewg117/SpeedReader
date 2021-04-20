@@ -5,8 +5,8 @@ const defaultText =
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.selectBlockOnClick = this.selectBlockOnClick.bind(this);
+    this.handleEditorText = this.handleEditorText.bind(this);
     this.startReader = this.startReader.bind(this);
     this.resetReader = this.resetReader.bind(this);
     this.openBlockMenu = this.openBlockMenu.bind(this);
@@ -15,7 +15,7 @@ class App extends React.Component {
     this.wpmSelector = this.wpmSelector.bind(this);
     this.toggleFullScreen = this.toggleFullScreen.bind(this);
     this.timeoutTimer = this.timeoutTimer.bind(this);
-    
+
     this.currentTime;
     this.nextTime;
 
@@ -30,35 +30,33 @@ class App extends React.Component {
       isStarted: false,
       wpmSpeed: 100,
       fullPreview: false,
-      fullBlock: false,
-      wordCount: 0
+      fullBlock: false
     };
   }
 
   // handles the value input from the editor and update the text and other state properties
-  handleChange(e) {
+  handleEditorText(e) {
     this.setState((state) => {
       return {
         text: e.target.value,
         currentBlock: 0,
         displayText: state.blockGroup[0].props.text,
-        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
       };
     });
-    this.wordCounter();
     this.resetTime();
   }
 
   // changes the display text and selected block to the block selected by the user in the preview element
-  handleClick(id, value) {
+  selectBlockOnClick(id, value) {
     this.setState((state) => {
       return {
         displayText: value,
         currentBlock: id,
-        blockGroup: this.convertText(id, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(id, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
@@ -68,25 +66,24 @@ class App extends React.Component {
   }
 
   // converts the editor text to a list of Block components
-  convertText(selectedID, text, wordsPerBlock) {
-    const arr = text.split(/\s/);
-    let temp = [];
-    let wordLen = wordsPerBlock;
+  convertTextToBlock(selectedID, text, wordsPerBlock) {
+    const splitTextArr = text.split(/\s/);
+    let joinedTextArr = [];
 
-    for (let i = 0; i < arr.length; i += wordLen) {
-      if (arr[i] !== "") {
-        temp.push(arr.slice(i, i + wordLen).join(" "));
+    for (let i = 0; i < splitTextArr.length; i += wordsPerBlock) {
+      if (splitTextArr[i] !== "") {
+        joinedTextArr.push(splitTextArr.slice(i, i + wordsPerBlock).join(" "));
       }
     }
 
-    const newArr = temp.map((text, i) => {
+    const blockArr = joinedTextArr.map((text, i) => {
       if (selectedID == i) {
         return (
           <Block
             key={i}
             id={i}
             text={text}
-            handleClick={this.handleClick}
+            selectBlockOnClick={this.selectBlockOnClick}
             isSelected={true}
           />
         );
@@ -96,12 +93,12 @@ class App extends React.Component {
           key={i}
           id={i}
           text={text}
-          handleClick={this.handleClick}
+          selectBlockOnClick={this.selectBlockOnClick}
           isSelected={false}
         />
       );
     });
-    return newArr;
+    return blockArr;
   }
 
   // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown 
@@ -120,21 +117,21 @@ class App extends React.Component {
       wpmSpeed,
       wordsPerBlock
     } = this.state;
-    
-    if(isStarted) {
-      if(!this.currentTime) {
-          this.currentTime = new Date().getTime();
-          this.nextTime = this.currentTime;
-        }
+
+    if (isStarted) {
+      if (!this.currentTime) {
+        this.currentTime = new Date().getTime();
+        this.nextTime = this.currentTime;
+      }
       this.nextTime += this.calcWPM(wpmSpeed, wordsPerBlock);
-    
+
       const nextBlock = currentBlock + 1;
 
       if (nextBlock < blockGroup.length) {
         this.setState({
           displayText: blockGroup[nextBlock].props.text,
           currentBlock: nextBlock,
-          blockGroup: this.convertText(nextBlock, text, wordsPerBlock)
+          blockGroup: this.convertTextToBlock(nextBlock, text, wordsPerBlock)
         });
 
         setTimeout(this.timeoutTimer, this.nextTime - new Date().getTime());
@@ -164,7 +161,7 @@ class App extends React.Component {
       wpmMenuOpen: false,
       blockMenuOpen: false
     });
-    
+
     let startStamp = new Date();
     console.log(`Start: ${startStamp.toString()}`);
 
@@ -179,13 +176,12 @@ class App extends React.Component {
         // text: defaultText,
         currentBlock: 0,
         displayText: state.blockGroup[0].props.text,
-        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
       };
     });
-    this.wordCounter();
     this.resetTime();
   }
 
@@ -212,7 +208,7 @@ class App extends React.Component {
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
   blockSizer(e) {
     this.setState((state) => {
-      const blocks = this.convertText(0, state.text, parseInt(e.target.innerText));
+      const blocks = this.convertTextToBlock(0, state.text, parseInt(e.target.innerText));
       return {
         wpmMenuOpen: false,
         blockMenuOpen: false,
@@ -233,7 +229,7 @@ class App extends React.Component {
       return {
         wpmMenuOpen: false,
         currentBlock: 0,
-        blockGroup: this.convertText(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
         displayText: state.blockGroup[0].props.text,
         isStarted: false,
         wpmSpeed: parseInt(e.target.innerText)
@@ -241,38 +237,20 @@ class App extends React.Component {
     });
     this.resetTime();
   }
-  
+
   // toggles the fullscreen state of the preview or block view
-  toggleFullScreen (e) {
-    // console.log(e.target.id);
-    if(e.target.id == 'fullBlock') {
+  toggleFullScreen(e) {
+    if (e.target.id == 'fullBlock') {
       this.setState({
         fullBlock: !this.state.fullBlock
       })
-    } else if(e.target.id == 'fullPreview') {
+    } else if (e.target.id == 'fullPreview') {
       this.setState({
         fullPreview: !this.state.fullPreview
       })
     }
   }
-  
-  // counts the number of words in the current text state
-  wordCounter() {
-    this.setState((state) => {
-      const arr = state.text.split(/\s/);
-      let newArr = [];
-      
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i] !== "") {
-          newArr.push(arr[i]);
-        }
-      }
-      return {
-        wordCount: newArr.length
-      };
-    });
-  }
-  
+
   // clears the timeout timer and resets it's time values
   resetTime() {
     clearTimeout(this.timeoutTimer);
@@ -284,18 +262,17 @@ class App extends React.Component {
   componentDidMount() {
     this.setState((state) => {
       return {
-        blockGroup: this.convertText(state.currentBlock, state.text, state.wordsPerBlock)
+        blockGroup: this.convertTextToBlock(state.currentBlock, state.text, state.wordsPerBlock)
       };
     });
-    this.wordCounter();
   }
-  
+
   // clears the Block list
   componentWillUnmount() {
     this.setState({
       blockGroup: []
     });
-    
+
     this.resetTime();
   }
 
@@ -313,69 +290,61 @@ class App extends React.Component {
       fullBlock,
       wordCount
     } = this.state;
-    
+
+    const blockSizeOptions = [1, 2, 3, 4];
+    const wpsSpeedOptions = [100, 200, 300, 400]
+
     return (
       <div id="main-container">
-        <TextEditor 
-          handleChange={this.handleChange} 
-          text={text} 
-         />
-        
-        <TextPreview 
-          sectionID={"preview"} 
-          textBlocks={blockGroup} 
-          isFullScreen={fullPreview} 
-          toggler={this.toggleFullScreen} 
+        <TextEditor
+          handleEditorText={this.handleEditorText}
+          text={text}
         />
-        
-        <BlockView 
-          sectionID={"block-view"} 
+
+        <TextPreview
+          sectionID={"preview"}
+          textBlocks={blockGroup}
+          isFullScreen={fullPreview}
+          toggler={this.toggleFullScreen}
+        />
+
+        <BlockView
+          sectionID={"block-view"}
           displayText={displayText}
-          isFullScreen={fullBlock} 
-          toggler={this.toggleFullScreen} 
+          isFullScreen={fullBlock}
+          toggler={this.toggleFullScreen}
         />
-        
+
         <WordCounter text={text} />
-        
-        <section id="input-view" className={(fullPreview || fullBlock) ? "lower": ""}>
-          <InputButton 
+
+        <section id="input-view" className={(fullPreview || fullBlock) ? "lower" : ""}>
+          <InputButton
             className={"btn btn-light"}
-            readerControl={this.startReader} 
-            btnText={isStarted ? "Pause" : "Start"} 
-          />
-          <InputButton 
-            className={"btn btn-light"}
-            readerControl={this.resetReader} 
-            btnText={"Reset"} 
+            readerControl={this.startReader}
+            btnText={isStarted ? "Pause" : "Start"}
           />
 
-          <div className="dropup">
-            <InputButton 
-              className={"btn btn-light dropdown-toggle"}
-              readerControl={this.openBlockMenu} 
-              btnText={`Block Size (${wordsPerBlock})`} 
-            />
-            <ul className={`dropdown-menu${blockMenuOpen ? " show" : ""}`}>
-              <DropdownOption selector={this.blockSizer} value={1} />
-              <DropdownOption selector={this.blockSizer} value={2} />
-              <DropdownOption selector={this.blockSizer} value={3} />
-              <DropdownOption selector={this.blockSizer} value={4} />
-            </ul>
-          </div>
+          <InputButton
+            className={"btn btn-light"}
+            readerControl={this.resetReader}
+            btnText={"Reset"}
+          />
 
-          <div className="dropup">
-            <InputButton 
-              className={"btn btn-light dropdown-toggle"}
-              readerControl={this.openWPMMenu} 
-              btnText={`WPM (${wpmSpeed})`} 
-            />
-            <ul className={`dropdown-menu${wpmMenuOpen ? " show" : ""}`}>
-              <DropdownOption selector={this.wpmSelector} value={100} />
-              <DropdownOption selector={this.wpmSelector} value={200} />
-              <DropdownOption selector={this.wpmSelector} value={300} />
-              <DropdownOption selector={this.wpmSelector} value={400} />
-            </ul>
-          </div>
+          <InputDropdown
+            readerControl={this.openBlockMenu}
+            openMenu={blockMenuOpen}
+            btnText={`Block Size (${wordsPerBlock})`}
+            selector={this.blockSizer}
+            options={blockSizeOptions}
+          />
+
+          <InputDropdown
+            readerControl={this.openWPMMenu}
+            openMenu={wpmMenuOpen}
+            btnText={`WPM (${wpmSpeed})`}
+            selector={this.wpmSelector}
+            options={wpsSpeedOptions}
+          />
         </section>
       </div>
     );
@@ -384,25 +353,25 @@ class App extends React.Component {
 
 const TextEditor = (props) => {
   return (
-     <textarea 
-       id="editor" 
-       onChange={props.handleChange} 
-       value={props.text} 
-     />
+    <textarea
+      id="editor"
+      onChange={props.handleEditorText}
+      value={props.text}
+    />
   );
 }
 
 // component that renders each word block
 const Block = (props) => {
-  const handleClick = () => {
-    props.handleClick(props.id, props.text);
+  const selectBlockOnClick = () => {
+    props.selectBlockOnClick(props.id, props.text);
   };
 
   return (
     <div
       id="textBlock"
       className={props.isSelected ? "isActive" : ""}
-      onClick={handleClick}
+      onClick={selectBlockOnClick}
     >
       {props.text}
     </div>
@@ -410,8 +379,8 @@ const Block = (props) => {
 };
 
 const TextPreview = (props) => {
-  return(
-    <section id={props.sectionID}  className={props.isFullScreen ? "fullScreen": "normal"}>
+  return (
+    <section id={props.sectionID} className={props.isFullScreen ? "fullScreen" : "normal"}>
       {props.textBlocks}
       <FullScreenToggler iconID={"fullPreview"} toggler={props.toggler} />
     </section>
@@ -420,8 +389,8 @@ const TextPreview = (props) => {
 
 
 const BlockView = (props) => {
-  return(
-    <section id={props.sectionID} className={props.isFullScreen ? "fullScreen": "normal"}>
+  return (
+    <section id={props.sectionID} className={props.isFullScreen ? "fullScreen" : "normal"}>
       <p>{props.displayText}</p>
       <FullScreenToggler iconID={"fullBlock"} toggler={props.toggler} />
     </section>
@@ -435,35 +404,61 @@ const FullScreenToggler = (props) => {
 }
 
 const WordCounter = (props) => {
-  
-  const wordCounter = (text) => {
-    const textArr = text.split(/\s/);
-    let cleanTextArr = [];
 
-    for (let i = 0; i < textArr.length; i++) {
-      if (textArr[i] !== "") {
-        cleanTextArr.push(textArr[i]);
-      }
+  const textArr = props.text.split(/\s/);
+  let cleanTextArr = [];
+  let wordCount = 0;
+
+  for (let i = 0; i < textArr.length; i++) {
+    if (textArr[i] !== "") {
+      cleanTextArr.push(textArr[i]);
     }
-    return (cleanTextArr.length);
   }
-  
-  return(
-    <div id="wordCount">{`Word Count: ${wordCounter(props.text)}`}</div>
+  wordCount = cleanTextArr.length;
+
+  return (
+    <div id="wordCount">{`Word Count: ${wordCount}`}</div>
   );
 }
 
 
 const InputButton = (props) => {
-  return(
+  return (
     <button className={props.className} onClick={props.readerControl}>
       {props.btnText}
     </button>
   );
 }
 
+
+const InputDropdown = (props) => {
+
+  const options = props.options.map((value, i) => {
+    return (
+      <DropdownOption 
+        key={i} 
+        selector={props.selector} 
+        value={value} 
+      />
+    );
+  });
+
+  return (
+    <div className="dropup">
+      <InputButton
+        className={"btn btn-light dropdown-toggle"}
+        readerControl={props.readerControl}
+        btnText={props.btnText}
+      />
+      <ul className={`dropdown-menu${props.openMenu ? " show" : ""}`}>
+        {options}
+      </ul>
+    </div>
+  );
+}
+
 const DropdownOption = (props) => {
-  return(
+  return (
     <li className="dropdown-item" onClick={props.selector}>
       {props.value}
     </li>
