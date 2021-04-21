@@ -2,7 +2,7 @@ const defaultText =
   "Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time. Default text to use in the project for word count and speed testing. It will, of course, change over time.";
 
 // main component class
-class App extends React.Component {
+class SpeedReader extends React.Component {
   constructor(props) {
     super(props);
     this.selectBlockOnClick = this.selectBlockOnClick.bind(this);
@@ -16,11 +16,8 @@ class App extends React.Component {
     this.toggleFullScreen = this.toggleFullScreen.bind(this);
     this.timeoutTimer = this.timeoutTimer.bind(this);
 
-    this.currentTime;
-    this.nextTime;
-
     this.state = {
-      text: defaultText,
+      editorText: defaultText,
       blockGroup: [],
       currentBlock: 0,
       displayText: "Load Text",
@@ -30,7 +27,9 @@ class App extends React.Component {
       isStarted: false,
       wpmSpeed: 100,
       fullPreview: false,
-      fullBlock: false
+      fullBlock: false,
+      currentTime: 0,
+      nextTime: 0
     };
   }
 
@@ -38,10 +37,10 @@ class App extends React.Component {
   handleEditorText(e) {
     this.setState((state) => {
       return {
-        text: e.target.value,
+        editorText: e.target.value,
         currentBlock: 0,
         displayText: state.blockGroup[0].props.text,
-        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.editorText, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
@@ -56,7 +55,7 @@ class App extends React.Component {
       return {
         displayText: value,
         currentBlock: id,
-        blockGroup: this.convertTextToBlock(id, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(id, state.editorText, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
@@ -76,7 +75,7 @@ class App extends React.Component {
       }
     }
 
-    const blockArr = joinedTextArr.map((text, i) => {
+    const blocksArr = joinedTextArr.map((text, i) => {
       if (selectedID == i) {
         return (
           <Block
@@ -98,7 +97,7 @@ class App extends React.Component {
         />
       );
     });
-    return blockArr;
+    return blocksArr;
   }
 
   // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown 
@@ -113,17 +112,25 @@ class App extends React.Component {
       isStarted,
       currentBlock,
       blockGroup,
-      text,
+      editorText,
+      wordsPerBlock,
       wpmSpeed,
-      wordsPerBlock
+      currentTime
     } = this.state;
 
     if (isStarted) {
-      if (!this.currentTime) {
-        this.currentTime = new Date().getTime();
-        this.nextTime = this.currentTime;
+      if (!currentTime) {
+        this.setState({
+          currentTime: new Date().getTime(),
+          nextTime: new Date().getTime()
+        });
       }
-      this.nextTime += this.calcWPM(wpmSpeed, wordsPerBlock);
+
+      this.setState((state) => {
+        return {
+          nextTime: state.nextTime + this.calcWPM(wpmSpeed, wordsPerBlock)
+        }
+      });
 
       const nextBlock = currentBlock + 1;
 
@@ -131,13 +138,13 @@ class App extends React.Component {
         this.setState({
           displayText: blockGroup[nextBlock].props.text,
           currentBlock: nextBlock,
-          blockGroup: this.convertTextToBlock(nextBlock, text, wordsPerBlock)
+          blockGroup: this.convertTextToBlock(nextBlock, editorText, wordsPerBlock)
         });
 
-        setTimeout(this.timeoutTimer, this.nextTime - new Date().getTime());
+        setTimeout(this.timeoutTimer, this.state.nextTime - new Date().getTime());
       } else {
         let endStamp = new Date();
-        console.log(`End: ${endStamp.toString()}`);
+        // console.log(`End: ${endStamp.toString()}`);
         this.setState({
           isStarted: false
         });
@@ -163,20 +170,19 @@ class App extends React.Component {
     });
 
     let startStamp = new Date();
-    console.log(`Start: ${startStamp.toString()}`);
+    // console.log(`Start: ${startStamp.toString()}`);
 
     this.resetTime();
     setTimeout(this.timeoutTimer, this.calcWPM(wpmSpeed, wordsPerBlock));
   }
 
-  // resets the App to default values
+  // resets the SpeedReader to default values
   resetReader() {
     this.setState((state) => {
       return {
-        // text: defaultText,
         currentBlock: 0,
         displayText: state.blockGroup[0].props.text,
-        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.editorText, state.wordsPerBlock),
         isStarted: false,
         wpmMenuOpen: false,
         blockMenuOpen: false
@@ -208,7 +214,7 @@ class App extends React.Component {
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
   blockSizer(e) {
     this.setState((state) => {
-      const blocks = this.convertTextToBlock(0, state.text, parseInt(e.target.innerText));
+      const blocks = this.convertTextToBlock(0, state.editorText, parseInt(e.target.innerText));
       return {
         wpmMenuOpen: false,
         blockMenuOpen: false,
@@ -229,7 +235,7 @@ class App extends React.Component {
       return {
         wpmMenuOpen: false,
         currentBlock: 0,
-        blockGroup: this.convertTextToBlock(0, state.text, state.wordsPerBlock),
+        blockGroup: this.convertTextToBlock(0, state.editorText, state.wordsPerBlock),
         displayText: state.blockGroup[0].props.text,
         isStarted: false,
         wpmSpeed: parseInt(e.target.innerText)
@@ -254,15 +260,17 @@ class App extends React.Component {
   // clears the timeout timer and resets it's time values
   resetTime() {
     clearTimeout(this.timeoutTimer);
-    this.currentTime = 0;
-    this.nextTime = 0;
+    this.setState({
+      currentTime: 0,
+      nextTime: 0
+    });
   }
 
   // initializes the state for the Block list
   componentDidMount() {
     this.setState((state) => {
       return {
-        blockGroup: this.convertTextToBlock(state.currentBlock, state.text, state.wordsPerBlock)
+        blockGroup: this.convertTextToBlock(state.currentBlock, state.editorText, state.wordsPerBlock)
       };
     });
   }
@@ -278,7 +286,7 @@ class App extends React.Component {
 
   render() {
     const {
-      text,
+      editorText,
       blockGroup,
       displayText,
       blockMenuOpen,
@@ -287,8 +295,7 @@ class App extends React.Component {
       wpmSpeed,
       wpmMenuOpen,
       fullPreview,
-      fullBlock,
-      wordCount
+      fullBlock
     } = this.state;
 
     const blockSizeOptions = [1, 2, 3, 4];
@@ -298,7 +305,7 @@ class App extends React.Component {
       <div id="main-container">
         <TextEditor
           handleEditorText={this.handleEditorText}
-          text={text}
+          text={editorText}
         />
 
         <TextPreview
@@ -315,7 +322,7 @@ class App extends React.Component {
           toggler={this.toggleFullScreen}
         />
 
-        <WordCounter text={text} />
+        <WordCounter text={editorText} />
 
         <section id="input-view" className={(fullPreview || fullBlock) ? "lower" : ""}>
           <InputButton
@@ -435,10 +442,10 @@ const InputDropdown = (props) => {
 
   const options = props.options.map((value, i) => {
     return (
-      <DropdownOption 
-        key={i} 
-        selector={props.selector} 
-        value={value} 
+      <DropdownOption
+        key={i}
+        selector={props.selector}
+        value={value}
       />
     );
   });
@@ -465,4 +472,4 @@ const DropdownOption = (props) => {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<SpeedReader />, document.getElementById("root"));
