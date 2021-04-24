@@ -5,14 +5,12 @@ const defaultText =
 class SpeedReader extends React.Component {
   constructor(props) {
     super(props);
-    this.selectBlockOnClick = this.selectBlockOnClick.bind(this);
     this.startReader = this.startReader.bind(this);
     this.resetReader = this.resetReader.bind(this);
     this.openBlockMenu = this.openBlockMenu.bind(this);
     this.openWPMMenu = this.openWPMMenu.bind(this);
     this.blockSizer = this.blockSizer.bind(this);
     this.wpmSelector = this.wpmSelector.bind(this);
-    this.toggleFullScreen = this.toggleFullScreen.bind(this);
     this.timeoutTimer = this.timeoutTimer.bind(this);
 
     this.state = {
@@ -24,30 +22,9 @@ class SpeedReader extends React.Component {
       wpmMenuOpen: false,
       isStarted: false,
       wpmSpeed: 100,
-      fullPreview: false,
-      fullBlock: false,
       currentTime: 0,
       nextTime: 0
     };
-  }
-
-  // changes the display text and selected block to the block selected by the user in the preview element
-  selectBlockOnClick(id, value) {
-    this.setState((state) => {
-      return {
-        displayText: value,
-        currentBlock: id,
-        blockGroup: this.convertTextToBlock(
-          id,
-          this.props.editorText,
-          state.wordsPerBlock
-        ),
-        isStarted: false,
-        wpmMenuOpen: false,
-        blockMenuOpen: false
-      };
-    });
-    this.resetTime();
   }
 
   // converts the editor text to a list of Block components
@@ -68,7 +45,7 @@ class SpeedReader extends React.Component {
             key={i}
             id={i}
             text={text}
-            selectBlockOnClick={this.selectBlockOnClick}
+            selectBlockOnClick={this.resetReader}
             isSelected={true}
           />
         );
@@ -78,7 +55,7 @@ class SpeedReader extends React.Component {
           key={i}
           id={i}
           text={text}
-          selectBlockOnClick={this.selectBlockOnClick}
+          selectBlockOnClick={this.resetReader}
           isSelected={false}
         />
       );
@@ -165,13 +142,17 @@ class SpeedReader extends React.Component {
   }
 
   // resets the SpeedReader to default values
-  resetReader() {
+  resetReader(blockIndex) {
+    if (blockIndex === undefined) {
+      blockIndex = 0;
+    }
+
     this.setState((state) => {
       return {
-        currentBlock: 0,
-        displayText: state.blockGroup[0].props.text,
+        currentBlock: blockIndex,
+        displayText: state.blockGroup[blockIndex].props.text,
         blockGroup: this.convertTextToBlock(
-          0,
+          blockIndex,
           this.props.editorText,
           state.wordsPerBlock
         ),
@@ -180,6 +161,7 @@ class SpeedReader extends React.Component {
         blockMenuOpen: false
       };
     });
+
     this.resetTime();
   }
 
@@ -244,19 +226,6 @@ class SpeedReader extends React.Component {
     this.resetTime();
   }
 
-  // toggles the fullscreen state of the preview or block view
-  toggleFullScreen(e) {
-    if (e.target.id == "fullBlock") {
-      this.setState({
-        fullBlock: !this.state.fullBlock
-      });
-    } else if (e.target.id == "fullPreview") {
-      this.setState({
-        fullPreview: !this.state.fullPreview
-      });
-    }
-  }
-
   // clears the timeout timer and resets it's time values
   resetTime() {
     clearTimeout(this.timeoutTimer);
@@ -296,9 +265,7 @@ class SpeedReader extends React.Component {
       wordsPerBlock,
       isStarted,
       wpmSpeed,
-      wpmMenuOpen,
-      fullPreview,
-      fullBlock
+      wpmMenuOpen
     } = this.state;
 
     const blockSizeOptions = [1, 2, 3, 4];
@@ -312,54 +279,63 @@ class SpeedReader extends React.Component {
           resetReader={this.resetReader}
         />
 
-        <TextPreview
-          sectionID={"preview"}
-          textBlocks={blockGroup}
-          isFullScreen={fullPreview}
-          toggler={this.toggleFullScreen}
-        />
 
-        <BlockView
-          sectionID={"block-view"}
-          displayText={displayText}
-          isFullScreen={fullBlock}
-          toggler={this.toggleFullScreen}
-        />
+        <FullScreenToggler>
+          {(fullPreview, fullBlock, toggle) => (
+            <>
+              <ReaderTextView
+                sectionID={"preview"}
+                blockValue={blockGroup}
+                iconID={"fullPreview"}
+                fullScreen={fullPreview}
+                toggle={toggle}
+              />
 
-        <WordCounter text={this.props.editorText} />
+              <ReaderTextView
+                sectionID={"block-view"}
+                blockValue={<p>{displayText}</p>}
+                iconID={"fullBlock"}
+                fullScreen={fullBlock}
+                toggle={toggle}
+              />
 
-        <section
-          id="input-view"
-          className={fullPreview || fullBlock ? "lower" : ""}
-        >
-          <InputButton
-            className={"btn btn-light"}
-            readerControl={this.startReader}
-            btnText={isStarted ? "Pause" : "Start"}
-          />
+              <WordCounter text={this.props.editorText} />
 
-          <InputButton
-            className={"btn btn-light"}
-            readerControl={this.resetReader}
-            btnText={"Reset"}
-          />
+              <section
+                id="input-view"
+                className={fullPreview || fullBlock ? "lower" : ""}
+              >
+                <InputButton
+                  className={"btn btn-light"}
+                  readerControl={this.startReader}
+                  btnText={isStarted ? "Pause" : "Start"}
+                />
 
-          <InputDropdown
-            readerControl={this.openBlockMenu}
-            openMenu={blockMenuOpen}
-            btnText={`Block Size (${wordsPerBlock})`}
-            selector={this.blockSizer}
-            options={blockSizeOptions}
-          />
+                <InputButton
+                  className={"btn btn-light"}
+                  readerControl={this.resetReader}
+                  btnText={"Reset"}
+                />
 
-          <InputDropdown
-            readerControl={this.openWPMMenu}
-            openMenu={wpmMenuOpen}
-            btnText={`WPM (${wpmSpeed})`}
-            selector={this.wpmSelector}
-            options={wpsSpeedOptions}
-          />
-        </section>
+                <InputDropdown
+                  readerControl={this.openBlockMenu}
+                  openMenu={blockMenuOpen}
+                  btnText={`Block Size (${wordsPerBlock})`}
+                  selector={this.blockSizer}
+                  options={blockSizeOptions}
+                />
+
+                <InputDropdown
+                  readerControl={this.openWPMMenu}
+                  openMenu={wpmMenuOpen}
+                  btnText={`WPM (${wpmSpeed})`}
+                  selector={this.wpmSelector}
+                  options={wpsSpeedOptions}
+                />
+              </section>
+            </>
+          )}
+        </FullScreenToggler>
       </div>
     );
   }
@@ -375,8 +351,7 @@ class HandleEditorText extends React.Component {
     };
   }
 
-  handleEditorText(e, resetReader) {
-    resetReader();
+  handleEditorText(e) {
     this.setState({
       editorText: e.target.value
     });
@@ -392,7 +367,8 @@ const TextEditor = (props) => {
     <textarea
       id="editor"
       onChange={(e) => {
-        props.handleEditorText(e, props.resetReader)
+        props.handleEditorText(e);
+        props.resetReader(0);
       }}
       value={props.text}
     />
@@ -402,7 +378,7 @@ const TextEditor = (props) => {
 // component that renders each word block
 const Block = (props) => {
   const selectBlockOnClick = () => {
-    props.selectBlockOnClick(props.id, props.text);
+    props.selectBlockOnClick(props.id);
   };
 
   return (
@@ -416,35 +392,56 @@ const Block = (props) => {
   );
 };
 
-const TextPreview = (props) => {
+
+const FullIcon = (props) => {
+  return (
+    <i
+      id={props.iconID}
+      className="fas fa-expand"
+      onClick={props.toggle}>
+    </i>
+  );
+}
+
+class FullScreenToggler extends React.Component {
+  constructor(props) {
+    super(props);
+    this.toggle = this.toggle.bind(this);
+
+    this.state = {
+      fullPreview: false,
+      fullBlock: false
+    };
+  }
+
+  toggle(e) {
+    if(e.target.id === 'fullPreview'){
+      this.setState({
+        fullPreview: !this.state.fullPreview
+      });
+    } else if (e.target.id === 'fullBlock') {
+      this.setState({
+        fullBlock: !this.state.fullBlock
+      });
+    }
+  }
+
+  render() {
+    return this.props.children(this.state.fullPreview, this.state.fullBlock, this.toggle);
+  }
+};
+
+const ReaderTextView = (props) => {
   return (
     <section
       id={props.sectionID}
-      className={props.isFullScreen ? "fullScreen" : "normal"}
+      className={props.fullScreen ? "fullScreen" : "normal"}
     >
-      {props.textBlocks}
-      <FullScreenToggler iconID={"fullPreview"} toggler={props.toggler} />
+      {props.blockValue}
+      <FullIcon iconID={props.iconID} toggle={props.toggle} />
     </section>
   );
-};
-
-const BlockView = (props) => {
-  return (
-    <section
-      id={props.sectionID}
-      className={props.isFullScreen ? "fullScreen" : "normal"}
-    >
-      <p>{props.displayText}</p>
-      <FullScreenToggler iconID={"fullBlock"} toggler={props.toggler} />
-    </section>
-  );
-};
-
-const FullScreenToggler = (props) => {
-  return (
-    <i id={props.iconID} className="fas fa-expand" onClick={props.toggler}></i>
-  );
-};
+}
 
 const WordCounter = (props) => {
   const textArr = props.text.split(/\s/);
@@ -462,8 +459,11 @@ const WordCounter = (props) => {
 };
 
 const InputButton = (props) => {
+  const inputClick = () => {
+    props.readerControl()
+  }
   return (
-    <button className={props.className} onClick={props.readerControl}>
+    <button className={props.className} onClick={inputClick}>
       {props.btnText}
     </button>
   );
