@@ -285,11 +285,11 @@ class SpeedReader extends React.Component {
                 />
 
               <OpenDropdownMenu>
-                {(toggleDropdownMenu, blockMenuOpen, wpmMenuOpen) => (
+                {(blockMenuOpen, wpmMenuOpen, toggleBlockDropdown, toggleWPMDropdown) => (
                   <>
                     <InputDropdown
                       dropdownID="blockDropdown"
-                      readerControl={toggleDropdownMenu}
+                      readerControl={toggleBlockDropdown}
                       openMenu={blockMenuOpen}
                       btnText={`Block Size (${wordsPerBlock})`}
                       selector={this.blockSizer}
@@ -298,7 +298,7 @@ class SpeedReader extends React.Component {
 
                     <InputDropdown
                       dropdownID="wpmDropdown"
-                      readerControl={toggleDropdownMenu}
+                      readerControl={toggleWPMDropdown}
                       openMenu={wpmMenuOpen}
                       btnText={`WPM (${wpmSpeed})`}
                       selector={this.wpmSelector}
@@ -437,7 +437,11 @@ class FullScreenToggler extends React.Component {
   }
 
   render() {
-    return this.props.children(this.state.fullPreview, this.state.fullBlock, this.toggle);
+    return this.props.children(
+      this.state.fullPreview, 
+      this.state.fullBlock, 
+      this.toggle
+    );
   }
 };
 
@@ -472,7 +476,8 @@ const WordCounter = (props) => {
 class OpenDropdownMenu extends React.Component {
   constructor(props) {
     super(props);
-    this.toggleDropdownMenu = this.toggleDropdownMenu.bind(this);
+    this.toggleBlockDropdown = this.toggleBlockDropdown.bind(this);
+    this.toggleWPMDropdown = this.toggleWPMDropdown.bind(this);
 
     this.state = {
       blockMenuOpen: false,
@@ -480,23 +485,27 @@ class OpenDropdownMenu extends React.Component {
     };
   }
 
-  toggleDropdownMenu(e) {
-    console.log(e.target.id);
-    if(e.target.id === 'blockDropdown'){
-      this.setState({
-        blockMenuOpen: !this.state.blockMenuOpen,
-        wpmMenuOpen: false
-      });
-    } else if (e.target.id === 'wpmDropdown') {
-      this.setState({
-        wpmMenuOpen: !this.state.wpmMenuOpen,
-        blockMenuOpen: false
-      });
-    }
+  toggleBlockDropdown() {
+    this.setState({
+      blockMenuOpen: !this.state.blockMenuOpen,
+      wpmMenuOpen: false
+    });
+  }
+  
+  toggleWPMDropdown() {
+    this.setState({
+      wpmMenuOpen: !this.state.wpmMenuOpen,
+      blockMenuOpen: false
+    });
   }
 
   render() {
-    return this.props.children(this.state.blockMenuOpen, this.state.wpmMenuOpen, this.toggleDropdownMenu);
+    return this.props.children(
+      this.state.blockMenuOpen, 
+      this.state.wpmMenuOpen, 
+      this.toggleBlockDropdown,
+      this.toggleWPMDropdown
+    );
   }
 };
 
@@ -505,7 +514,11 @@ const InputButton = (props) => {
     props.readerControl()
   }
   return (
-    <button id={props.inputID} className={props.className} onClick={props.className == "btn btn-light" ? inputClick : props.readerControl}>
+    <button 
+      id={props.inputID} 
+      className={props.className} 
+      onClick={inputClick}
+    >
       {props.btnText}
     </button>
   );
@@ -513,7 +526,13 @@ const InputButton = (props) => {
 
 const InputDropdown = (props) => {
   const options = props.options.map((value, i) => {
-    return <DropdownOption key={i} selector={props.selector} value={value} />;
+    return (
+      <DropdownOption 
+        key={i} 
+        selector={props.selector} 
+        value={value} 
+      />
+    );
   });
 
   return (
