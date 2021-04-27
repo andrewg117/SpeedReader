@@ -7,8 +7,6 @@ class SpeedReader extends React.Component {
     super(props);
     this.startReader = this.startReader.bind(this);
     this.resetReader = this.resetReader.bind(this);
-    this.openBlockMenu = this.openBlockMenu.bind(this);
-    this.openWPMMenu = this.openWPMMenu.bind(this);
     this.blockSizer = this.blockSizer.bind(this);
     this.wpmSelector = this.wpmSelector.bind(this);
     this.timeoutTimer = this.timeoutTimer.bind(this);
@@ -18,8 +16,6 @@ class SpeedReader extends React.Component {
       currentBlock: 0,
       displayText: "Load Text",
       wordsPerBlock: 1,
-      blockMenuOpen: false,
-      wpmMenuOpen: false,
       isStarted: false,
       wpmSpeed: 100,
       currentTime: 0,
@@ -94,9 +90,7 @@ class SpeedReader extends React.Component {
     const { isStarted, wpmSpeed, wordsPerBlock } = this.state;
 
     this.setState({
-      isStarted: !isStarted,
-      wpmMenuOpen: false,
-      blockMenuOpen: false
+      isStarted: !isStarted
     });
 
     let startStamp = new Date();
@@ -122,33 +116,11 @@ class SpeedReader extends React.Component {
           state.wordsPerBlock, 
           this.resetReader
         ),
-        isStarted: false,
-        wpmMenuOpen: false,
-        blockMenuOpen: false
+        isStarted: false
       };
     });
 
     this.resetTime();
-  }
-
-  // opens the Block Size dropdown
-  openBlockMenu() {
-    this.setState((state) => {
-      return {
-        blockMenuOpen: !state.blockMenuOpen,
-        wpmMenuOpen: false
-      };
-    });
-  }
-
-  // opens the WPM dropdown
-  openWPMMenu() {
-    this.setState((state) => {
-      return {
-        wpmMenuOpen: !state.wpmMenuOpen,
-        blockMenuOpen: false
-      };
-    });
   }
 
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
@@ -161,8 +133,6 @@ class SpeedReader extends React.Component {
           this.resetReader
         );
       return {
-        wpmMenuOpen: false,
-        blockMenuOpen: false,
         wordsPerBlock: parseInt(e.target.innerText),
         currentBlock: 0,
         blockGroup: blocks,
@@ -178,7 +148,6 @@ class SpeedReader extends React.Component {
   wpmSelector(e) {
     this.setState((state) => {
       return {
-        wpmMenuOpen: false,
         currentBlock: 0,
         blockGroup: ConvertTextToBlocks(
           0, 
