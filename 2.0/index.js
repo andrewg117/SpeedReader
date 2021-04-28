@@ -15,17 +15,15 @@ class SpeedReader extends React.Component {
       blockGroup: [],
       currentBlock: 0,
       displayText: "Load Text",
-      wordsPerBlock: 1,
       isStarted: false,
-      wpmSpeed: 100,
       currentTime: 0,
       nextTime: 0
     };
   }
 
   // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown
-  calcWPM(wpm, block) {
-    const calc = (60 / wpm) * 1000 * block;
+  calcWPM(wpm, blockSizer) {
+    const calc = (60 / wpm) * 1000 * blockSizer;
     return calc;
   }
 
@@ -35,8 +33,6 @@ class SpeedReader extends React.Component {
       isStarted,
       currentBlock,
       blockGroup,
-      wordsPerBlock,
-      wpmSpeed,
       currentTime
     } = this.state;
 
@@ -50,7 +46,7 @@ class SpeedReader extends React.Component {
 
       this.setState((state) => {
         return {
-          nextTime: state.nextTime + this.calcWPM(wpmSpeed, wordsPerBlock)
+          nextTime: state.nextTime + this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock)
         };
       });
 
@@ -63,7 +59,7 @@ class SpeedReader extends React.Component {
           blockGroup: ConvertTextToBlocks(
               nextBlock, 
               this.props.editorText, 
-              wordsPerBlock, 
+              this.props.wordsPerBlock, 
               this.resetReader
             )
         });
@@ -87,17 +83,17 @@ class SpeedReader extends React.Component {
 
   // starts the timeoutTimer function and changes the isStarted state
   startReader() {
-    const { isStarted, wpmSpeed, wordsPerBlock } = this.state;
+    const { isStarted } = this.state;
 
     this.setState({
       isStarted: !isStarted
     });
 
-    let startStamp = new Date();
+    // let startStamp = new Date();
     // console.log(`Start: ${startStamp.toString()}`);
 
     this.resetTime();
-    setTimeout(this.timeoutTimer, this.calcWPM(wpmSpeed, wordsPerBlock));
+    setTimeout(this.timeoutTimer, this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
   }
 
   // resets the SpeedReader to default values
@@ -113,7 +109,7 @@ class SpeedReader extends React.Component {
         blockGroup: ConvertTextToBlocks(
           blockIndex, 
           this.props.editorText, 
-          state.wordsPerBlock, 
+          this.props.wordsPerBlock, 
           this.resetReader
         ),
         isStarted: false
@@ -123,8 +119,10 @@ class SpeedReader extends React.Component {
     this.resetTime();
   }
 
+
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
   blockSizer(e) {
+    this.props.blockSizeSelector(e);
     this.setState((state) => {
       const blocks = ConvertTextToBlocks(
           0, 
@@ -137,8 +135,7 @@ class SpeedReader extends React.Component {
         currentBlock: 0,
         blockGroup: blocks,
         displayText: blocks[0].props.text,
-        isStarted: false,
-        wpmSpeed: state.wpmSpeed
+        isStarted: false
       };
     });
     this.resetTime();
@@ -146,18 +143,18 @@ class SpeedReader extends React.Component {
 
   // changes the state of the wpmSpeed value when an option in the WPM dropdown is selected
   wpmSelector(e) {
+    this.props.wpmSelector(e);
     this.setState((state) => {
       return {
         currentBlock: 0,
         blockGroup: ConvertTextToBlocks(
           0, 
           this.props.editorText, 
-          state.wordsPerBlock, 
+          this.props.wordsPerBlock, 
           this.resetReader
         ),
         displayText: state.blockGroup[0].props.text,
-        isStarted: false,
-        wpmSpeed: parseInt(e.target.innerText)
+        isStarted: false
       };
     });
     this.resetTime();
@@ -179,7 +176,7 @@ class SpeedReader extends React.Component {
         blockGroup: ConvertTextToBlocks(
           state.currentBlock, 
           this.props.editorText, 
-          state.wordsPerBlock, 
+          this.props.wordsPerBlock, 
           this.resetReader
         )
       };
@@ -199,9 +196,7 @@ class SpeedReader extends React.Component {
     const {
       blockGroup,
       displayText,
-      wordsPerBlock,
-      isStarted,
-      wpmSpeed
+      isStarted
     } = this.state;
 
     const blockSizeOptions = [1, 2, 3, 4];
@@ -260,7 +255,7 @@ class SpeedReader extends React.Component {
                       dropdownID="blockDropdown"
                       readerControl={toggleBlockDropdown}
                       openMenu={blockMenuOpen}
-                      btnText={`Block Size (${wordsPerBlock})`}
+                      btnText={`Block Size (${this.props.wordsPerBlock})`}
                       selector={this.blockSizer}
                       options={blockSizeOptions}
                     />
@@ -269,7 +264,7 @@ class SpeedReader extends React.Component {
                       dropdownID="wpmDropdown"
                       readerControl={toggleWPMDropdown}
                       openMenu={wpmMenuOpen}
-                      btnText={`WPM (${wpmSpeed})`}
+                      btnText={`WPM (${this.props.wpmSpeed})`}
                       selector={this.wpmSelector}
                       options={wpsSpeedOptions}
                     />
@@ -519,6 +514,41 @@ const InputDropdown = (props) => {
   );
 };
 
+class DropdownSelector extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.blockSizeSelector = this.blockSizeSelector.bind(this);
+    this.wpmSelector = this.wpmSelector.bind(this);
+  
+    this.state = {
+      wordsPerBlock: 1,
+      wpmSpeed: 100
+    }
+  }
+
+  blockSizeSelector(e) {
+    this.setState({
+      wordsPerBlock: parseInt(e.target.innerText)
+    });
+  }
+
+  wpmSelector(e) {
+    this.setState({
+      wpmSpeed: parseInt(e.target.innerText)
+    });
+  }
+
+  render() {
+    return this.props.children(
+      this.blockSizeSelector, 
+      this.wpmSelector, 
+      this.state.wordsPerBlock,
+      this.state.wpmSpeed
+    );
+  }
+}
+
 const DropdownOption = (props) => {
   return (
     <li className="dropdown-item" onClick={props.selector}>
@@ -532,10 +562,18 @@ const DisplayReader = () => {
   return (
     <HandleEditorText>
       {(handleEditorText, editorText) => (
-        <SpeedReader
-          handleEditorText={handleEditorText}
-          editorText={editorText}
-        />
+        <DropdownSelector>
+          {(blockSizeSelector, wpmSelector, wordsPerBlock, wpmSpeed) => (
+          <SpeedReader
+            handleEditorText={handleEditorText}
+            editorText={editorText}
+            blockSizeSelector={blockSizeSelector}
+            wpmSelector={wpmSelector}
+            wordsPerBlock={wordsPerBlock}
+            wpmSpeed={wpmSpeed}
+          />
+          )}
+        </DropdownSelector>
       )}
     </HandleEditorText>
   );
