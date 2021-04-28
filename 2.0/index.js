@@ -123,41 +123,28 @@ class SpeedReader extends React.Component {
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
   blockSizer(e) {
     this.props.blockSizeSelector(e);
-    this.setState((state) => {
-      const blocks = ConvertTextToBlocks(
-          0, 
-          this.props.editorText, 
-          parseInt(e.target.innerText), 
-          this.resetReader
-        );
-      return {
-        wordsPerBlock: parseInt(e.target.innerText),
-        currentBlock: 0,
-        blockGroup: blocks,
-        displayText: blocks[0].props.text,
-        isStarted: false
-      };
+
+    const blocks = ConvertTextToBlocks(
+        0, 
+        this.props.editorText, 
+        parseInt(e.target.innerText), 
+        this.resetReader
+      );
+
+    this.setState({
+      currentBlock: 0,
+      blockGroup: blocks,
+      displayText: blocks[0].props.text,
+      isStarted: false
     });
+
     this.resetTime();
   }
 
   // changes the state of the wpmSpeed value when an option in the WPM dropdown is selected
   wpmSelector(e) {
     this.props.wpmSelector(e);
-    this.setState((state) => {
-      return {
-        currentBlock: 0,
-        blockGroup: ConvertTextToBlocks(
-          0, 
-          this.props.editorText, 
-          this.props.wordsPerBlock, 
-          this.resetReader
-        ),
-        displayText: state.blockGroup[0].props.text,
-        isStarted: false
-      };
-    });
-    this.resetTime();
+    this.resetReader(0);
   }
 
   // clears the timeout timer and resets it's time values
