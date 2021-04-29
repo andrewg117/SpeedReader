@@ -3,32 +3,23 @@ const defaultText =
 
 // main component class
 class SpeedReader extends React.Component {
-  constructor(props) {
-    super(props);
-    this.startReader = this.startReader.bind(this);
-    this.resetReader = this.resetReader.bind(this);
-    this.blockSizer = this.blockSizer.bind(this);
-    this.wpmSelector = this.wpmSelector.bind(this);
-    this.timeoutTimer = this.timeoutTimer.bind(this);
-
-    this.state = {
-      blockGroup: [],
-      currentBlock: 0,
-      displayText: "Load Text",
-      isStarted: false,
-      currentTime: 0,
-      nextTime: 0
-    };
-  }
+  state = {
+    blockGroup: [],
+    currentBlock: 0,
+    displayText: "Load Text",
+    isStarted: false,
+    currentTime: 0,
+    nextTime: 0
+  };
 
   // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown
-  calcWPM(wpm, blockSizer) {
-    const calc = (60 / wpm) * 1000 * blockSizer;
+  calcWPM = (wpm, blockSize) => {
+    const calc = (60 / wpm) * 1000 * blockSize;
     return calc;
   }
 
   // timer used to increment through the block list
-  timeoutTimer() {
+  timeoutTimer = () => {
     const {
       isStarted,
       currentBlock,
@@ -69,7 +60,7 @@ class SpeedReader extends React.Component {
           this.state.nextTime - new Date().getTime()
         );
       } else {
-        let endStamp = new Date();
+        // let endStamp = new Date();
         // console.log(`End: ${endStamp.toString()}`);
         this.setState({
           isStarted: false
@@ -82,7 +73,7 @@ class SpeedReader extends React.Component {
   }
 
   // starts the timeoutTimer function and changes the isStarted state
-  startReader() {
+  startReader = () => {
     const { isStarted } = this.state;
 
     this.setState({
@@ -92,12 +83,13 @@ class SpeedReader extends React.Component {
     // let startStamp = new Date();
     // console.log(`Start: ${startStamp.toString()}`);
 
+    this.props.closeDropdown(); 
     this.resetTime();
     setTimeout(this.timeoutTimer, this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
   }
 
   // resets the SpeedReader to default values
-  resetReader(blockIndex) {
+  resetReader = (blockIndex) => {
     if (blockIndex === undefined) {
       blockIndex = 0;
     }
@@ -115,13 +107,14 @@ class SpeedReader extends React.Component {
         isStarted: false
       };
     });
-
+    
+    this.props.closeDropdown(); 
     this.resetTime();
   }
 
 
   // changes the state of the wordsPerBlock value when an option in the Block dropdown is selected
-  blockSizer(e) {
+  blockSizer = (e) => {
     this.props.blockSizeSelector(e);
 
     const blocks = ConvertTextToBlocks(
@@ -138,17 +131,18 @@ class SpeedReader extends React.Component {
       isStarted: false
     });
 
+    this.props.closeDropdown(); 
     this.resetTime();
   }
 
   // changes the state of the wpmSpeed value when an option in the WPM dropdown is selected
-  wpmSelector(e) {
+  wpmSelector = (e) => {
     this.props.wpmSelector(e);
     this.resetReader(0);
   }
 
   // clears the timeout timer and resets it's time values
-  resetTime() {
+  resetTime = () => {
     clearTimeout(this.timeoutTimer);
     this.setState({
       currentTime: 0,
@@ -235,29 +229,23 @@ class SpeedReader extends React.Component {
                   btnText={"Reset"}
                 />
 
-              <OpenDropdownMenu>
-                {(blockMenuOpen, wpmMenuOpen, toggleBlockDropdown, toggleWPMDropdown) => (
-                  <>
-                    <InputDropdown
-                      dropdownID="blockDropdown"
-                      readerControl={toggleBlockDropdown}
-                      openMenu={blockMenuOpen}
-                      btnText={`Block Size (${this.props.wordsPerBlock})`}
-                      selector={this.blockSizer}
-                      options={blockSizeOptions}
-                    />
+                <InputDropdown
+                  dropdownID="blockDropdown"
+                  readerControl={this.props.toggleBlockDropdown}
+                  openMenu={this.props.blockMenuOpen}
+                  btnText={`Block Size (${this.props.wordsPerBlock})`}
+                  selector={this.blockSizer}
+                  options={blockSizeOptions}
+                />
 
-                    <InputDropdown
-                      dropdownID="wpmDropdown"
-                      readerControl={toggleWPMDropdown}
-                      openMenu={wpmMenuOpen}
-                      btnText={`WPM (${this.props.wpmSpeed})`}
-                      selector={this.wpmSelector}
-                      options={wpsSpeedOptions}
-                    />
-                  </>
-                )}
-              </OpenDropdownMenu>
+                <InputDropdown
+                  dropdownID="wpmDropdown"
+                  readerControl={this.props.toggleWPMDropdown}
+                  openMenu={this.props.wpmMenuOpen}
+                  btnText={`WPM (${this.props.wpmSpeed})`}
+                  selector={this.wpmSelector}
+                  options={wpsSpeedOptions}
+                />
               </section>
             </>
           )}
@@ -268,16 +256,12 @@ class SpeedReader extends React.Component {
 }
 
 class HandleEditorText extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleEditorText = this.handleEditorText.bind(this);
 
-    this.state = {
-      editorText: defaultText
-    };
-  }
+  state = {
+    editorText: defaultText
+  };
 
-  handleEditorText(e) {
+  handleEditorText = (e) => {
     this.setState({
       editorText: e.target.value
     });
@@ -365,17 +349,12 @@ const FullIcon = (props) => {
 }
 
 class FullScreenToggler extends React.Component {
-  constructor(props) {
-    super(props);
-    this.toggle = this.toggle.bind(this);
+  state = {
+    fullPreview: false,
+    fullBlock: false
+  };
 
-    this.state = {
-      fullPreview: false,
-      fullBlock: false
-    };
-  }
-
-  toggle(e) {
+  toggle = (e) => {
     if(e.target.id === 'fullPreview'){
       this.setState({
         fullPreview: !this.state.fullPreview
@@ -424,29 +403,31 @@ const WordCounter = (props) => {
 };
 
 
-class OpenDropdownMenu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.toggleBlockDropdown = this.toggleBlockDropdown.bind(this);
-    this.toggleWPMDropdown = this.toggleWPMDropdown.bind(this);
+class ToggleDropdownMenu extends React.Component {
+  state = {
+    blockMenuOpen: false,
+    wpmMenuOpen: false
+  };
+  
 
-    this.state = {
-      blockMenuOpen: false,
-      wpmMenuOpen: false
-    };
-  }
-
-  toggleBlockDropdown() {
+  toggleBlockDropdown = () => {
     this.setState({
       blockMenuOpen: !this.state.blockMenuOpen,
       wpmMenuOpen: false
     });
   }
   
-  toggleWPMDropdown() {
+  toggleWPMDropdown = () => {
     this.setState({
       wpmMenuOpen: !this.state.wpmMenuOpen,
       blockMenuOpen: false
+    });
+  }
+
+  closeDropdown = () => {
+    this.setState({
+      blockMenuOpen: false,
+      wpmMenuOpen: false
     });
   }
 
@@ -455,7 +436,8 @@ class OpenDropdownMenu extends React.Component {
       this.state.blockMenuOpen, 
       this.state.wpmMenuOpen, 
       this.toggleBlockDropdown,
-      this.toggleWPMDropdown
+      this.toggleWPMDropdown,
+      this.closeDropdown
     );
   }
 };
@@ -487,40 +469,33 @@ const InputDropdown = (props) => {
   });
 
   return (
-      <div className="dropup">
-        <InputButton
-          inputID={props.dropdownID}
-          className={"btn btn-light dropdown-toggle"}
-          readerControl={props.readerControl}
-          btnText={props.btnText}
-        />
-        <ul className={`dropdown-menu${props.openMenu ? " show" : ""}`}>
-          {options}
-        </ul>
-      </div>
+    <div className="dropup">
+      <InputButton
+        inputID={props.dropdownID}
+        className={"btn btn-light dropdown-toggle"}
+        readerControl={props.readerControl}
+        btnText={props.btnText}
+      />
+      <ul className={`dropdown-menu${props.openMenu ? " show" : ""}`}>
+        {options}
+      </ul>
+    </div>
   );
 };
 
 class DropdownSelector extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.blockSizeSelector = this.blockSizeSelector.bind(this);
-    this.wpmSelector = this.wpmSelector.bind(this);
-  
-    this.state = {
-      wordsPerBlock: 1,
-      wpmSpeed: 100
-    }
+  state = {
+    wordsPerBlock: 1,
+    wpmSpeed: 100
   }
 
-  blockSizeSelector(e) {
+  blockSizeSelector = (e) => {
     this.setState({
       wordsPerBlock: parseInt(e.target.innerText)
     });
   }
 
-  wpmSelector(e) {
+  wpmSelector = (e) => {
     this.setState({
       wpmSpeed: parseInt(e.target.innerText)
     });
@@ -550,15 +525,35 @@ const DisplayReader = () => {
     <HandleEditorText>
       {(handleEditorText, editorText) => (
         <DropdownSelector>
-          {(blockSizeSelector, wpmSelector, wordsPerBlock, wpmSpeed) => (
-          <SpeedReader
-            handleEditorText={handleEditorText}
-            editorText={editorText}
-            blockSizeSelector={blockSizeSelector}
-            wpmSelector={wpmSelector}
-            wordsPerBlock={wordsPerBlock}
-            wpmSpeed={wpmSpeed}
-          />
+          {(
+            blockSizeSelector, 
+            wpmSelector, 
+            wordsPerBlock, 
+            wpmSpeed
+            ) => (
+            <ToggleDropdownMenu>
+              {(
+                blockMenuOpen, 
+                wpmMenuOpen, 
+                toggleBlockDropdown, 
+                toggleWPMDropdown, 
+                closeDropdown
+                ) => (
+                <SpeedReader
+                  handleEditorText={handleEditorText}
+                  editorText={editorText}
+                  blockSizeSelector={blockSizeSelector}
+                  wpmSelector={wpmSelector}
+                  wordsPerBlock={wordsPerBlock}
+                  wpmSpeed={wpmSpeed}
+                  blockMenuOpen={blockMenuOpen}
+                  wpmMenuOpen={wpmMenuOpen}
+                  toggleBlockDropdown={toggleBlockDropdown}
+                  toggleWPMDropdown={toggleWPMDropdown}
+                  closeDropdown={closeDropdown}
+                />
+              )}
+            </ToggleDropdownMenu>
           )}
         </DropdownSelector>
       )}
