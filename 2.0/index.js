@@ -83,7 +83,6 @@ class SpeedReader extends React.Component {
     // let startStamp = new Date();
     // console.log(`Start: ${startStamp.toString()}`);
 
-    this.props.closeDropdown();
     this.resetTime();
     setTimeout(this.timeoutTimer, this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
   }
@@ -108,7 +107,6 @@ class SpeedReader extends React.Component {
       };
     });
 
-    this.props.closeDropdown();
     this.resetTime();
   }
 
@@ -131,7 +129,6 @@ class SpeedReader extends React.Component {
       isStarted: false
     });
 
-    this.props.closeDropdown();
     this.resetTime();
   }
 
@@ -228,23 +225,34 @@ class SpeedReader extends React.Component {
                 btnText={"Reset"}
               />
 
-              <InputDropdown
-                dropdownID="blockDropdown"
-                readerControl={this.props.toggleBlockDropdown}
-                openMenu={this.props.blockMenuOpen}
-                btnText={`Block Size (${this.props.wordsPerBlock})`}
-                selector={this.blockSizer}
-                options={blockSizeOptions}
-              />
+              <ToggleDropdownMenu>
+                {(
+                  blockMenuOpen,
+                  wpmMenuOpen,
+                  toggleBlockDropdown,
+                  toggleWPMDropdown
+                ) => (
+                  <>
+                    <InputDropdown
+                      dropdownID="blockDropdown"
+                      readerControl={toggleBlockDropdown}
+                      openMenu={blockMenuOpen}
+                      btnText={`Block Size (${this.props.wordsPerBlock})`}
+                      selector={this.blockSizer}
+                      options={blockSizeOptions}
+                    />
 
-              <InputDropdown
-                dropdownID="wpmDropdown"
-                readerControl={this.props.toggleWPMDropdown}
-                openMenu={this.props.wpmMenuOpen}
-                btnText={`WPM (${this.props.wpmSpeed})`}
-                selector={this.wpmSelector}
-                options={wpsSpeedOptions}
-              />
+                    <InputDropdown
+                      dropdownID="wpmDropdown"
+                      readerControl={toggleWPMDropdown}
+                      openMenu={wpmMenuOpen}
+                      btnText={`WPM (${this.props.wpmSpeed})`}
+                      selector={this.wpmSelector}
+                      options={wpsSpeedOptions}
+                    />
+                  </>
+                )}
+              </ToggleDropdownMenu>
             </section>
           </div>
         )}
@@ -310,24 +318,13 @@ const ConvertTextToBlocks = (selectedID, editorText, wordsPerBlock, resetReader)
   }
 
   const blocksArr = joinedTextArr.map((text, index) => {
-    if (selectedID == index) {
-      return (
-        <Block
-          key={index}
-          id={index}
-          text={text}
-          selectBlockOnClick={resetReader}
-          isSelected={true}
-        />
-      );
-    }
     return (
       <Block
         key={index}
         id={index}
         text={text}
         selectBlockOnClick={resetReader}
-        isSelected={false}
+        isSelected={selectedID == index ? true : false}
       />
     );
   });
@@ -429,11 +426,21 @@ class ToggleDropdownMenu extends React.Component {
     });
   }
 
-  closeDropdown = () => {
-    this.setState({
-      blockMenuOpen: false,
-      wpmMenuOpen: false
-    });
+  closeDropdown = (e) => {
+    if (e.target.id != "blockDropdown" || e.target.id != "wpmDropdown") {
+      this.setState({
+        blockMenuOpen: false,
+        wpmMenuOpen: false
+      });
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('mouseup', this.closeDropdown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mouseup', this.closeDropdown);
   }
 
   render() {
@@ -441,8 +448,7 @@ class ToggleDropdownMenu extends React.Component {
       this.state.blockMenuOpen,
       this.state.wpmMenuOpen,
       this.toggleBlockDropdown,
-      this.toggleWPMDropdown,
-      this.closeDropdown
+      this.toggleWPMDropdown
     );
   }
 };
@@ -536,29 +542,14 @@ const DisplayReader = () => {
             wordsPerBlock,
             wpmSpeed
           ) => (
-            <ToggleDropdownMenu>
-              {(
-                blockMenuOpen,
-                wpmMenuOpen,
-                toggleBlockDropdown,
-                toggleWPMDropdown,
-                closeDropdown
-              ) => (
-                <SpeedReader
-                  handleEditorText={handleEditorText}
-                  editorText={editorText}
-                  blockSizeSelector={blockSizeSelector}
-                  wpmSelector={wpmSelector}
-                  wordsPerBlock={wordsPerBlock}
-                  wpmSpeed={wpmSpeed}
-                  blockMenuOpen={blockMenuOpen}
-                  wpmMenuOpen={wpmMenuOpen}
-                  toggleBlockDropdown={toggleBlockDropdown}
-                  toggleWPMDropdown={toggleWPMDropdown}
-                  closeDropdown={closeDropdown}
-                />
-              )}
-            </ToggleDropdownMenu>
+            <SpeedReader
+              handleEditorText={handleEditorText}
+              editorText={editorText}
+              blockSizeSelector={blockSizeSelector}
+              wpmSelector={wpmSelector}
+              wordsPerBlock={wordsPerBlock}
+              wpmSpeed={wpmSpeed}
+            />
           )}
         </DropdownSelector>
       )}
