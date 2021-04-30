@@ -310,24 +310,13 @@ const ConvertTextToBlocks = (selectedID, editorText, wordsPerBlock, resetReader)
   }
 
   const blocksArr = joinedTextArr.map((text, index) => {
-    if (selectedID == index) {
-      return (
-        <Block
-          key={index}
-          id={index}
-          text={text}
-          selectBlockOnClick={resetReader}
-          isSelected={true}
-        />
-      );
-    }
     return (
       <Block
         key={index}
         id={index}
         text={text}
         selectBlockOnClick={resetReader}
-        isSelected={false}
+        isSelected={selectedID == index ? true : false}
       />
     );
   });
