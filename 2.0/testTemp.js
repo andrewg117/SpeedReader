@@ -7,78 +7,33 @@ class SpeedReader extends React.Component {
     blockGroup: [],
     currentBlock: 0,
     displayText: "Load Text",
-    isStarted: false,
-    currentTime: 0,
-    nextTime: 0
+    isStarted: false
   };
 
-  // timer used to increment through the block list
-  timeoutTimer = () => {
-    const {
-      isStarted,
-      currentBlock,
-      blockGroup,
-      currentTime
-    } = this.state;
-
-    if (isStarted) {
-      if (!currentTime) {
-        this.setState({
-          currentTime: new Date().getTime(),
-          nextTime: new Date().getTime()
-        });
-      }
-
-      this.setState((state) => {
-        return {
-          nextTime: state.nextTime + CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock)
-        };
-      });
-
-      const nextBlock = currentBlock + 1;
-
-      if (nextBlock < blockGroup.length) {
-        this.setState({
-          displayText: blockGroup[nextBlock].props.text,
-          currentBlock: nextBlock,
-          blockGroup: ConvertTextToBlocks(
-            nextBlock,
-            this.props.editorText,
-            this.props.wordsPerBlock,
-            this.resetReader
-          )
-        });
-
-        setTimeout(
-          this.timeoutTimer,
-          this.state.nextTime - new Date().getTime()
-        );
-      } else {
-        // let endStamp = new Date();
-        // console.log(`End: ${endStamp.toString()}`);
-        this.setState({
-          isStarted: false
-        });
-        this.resetTime();
-      }
-    } else {
-      this.resetTime();
-    }
-  }
 
   // starts the timeoutTimer function and changes the isStarted state
   startReader = () => {
-    const { isStarted } = this.state;
+    const { blockGroup, currentBlock } = this.state;
+
+
+    /* let startStamp = new Date();
+    console.log(`Start: ${startStamp.toString()}`); */
+
+
+    this.props.resetTime();
 
     this.setState({
-      isStarted: !isStarted
+      isStarted: !this.state.isStarted
     });
 
-    // let startStamp = new Date();
-    // console.log(`Start: ${startStamp.toString()}`);
+    setTimeout(this.props.timeoutTimer(this.state.isStarted, blockGroup.length, currentBlock, this.selectNextBlock, this.pauseReader), CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
 
-    this.resetTime();
-    setTimeout(this.timeoutTimer, CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
+  }
+
+  pauseReader = () => {
+    this.setState({
+      isStarted: false
+    });
   }
 
   // resets the SpeedReader to default values
@@ -101,7 +56,22 @@ class SpeedReader extends React.Component {
       };
     });
 
-    this.resetTime();
+    this.props.resetTime();
+  }
+
+  selectNextBlock = (nextBlock) => {
+    this.setState((state) => {
+      return {
+        displayText: state.blockGroup[nextBlock].props.text,
+        currentBlock: nextBlock,
+        blockGroup: ConvertTextToBlocks(
+          nextBlock,
+          this.props.editorText,
+          this.props.wordsPerBlock,
+          this.resetReader
+        )
+      }
+    });
   }
 
 
@@ -123,22 +93,13 @@ class SpeedReader extends React.Component {
       isStarted: false
     });
 
-    this.resetTime();
+    this.props.resetTime();
   }
 
   // changes the state of the wpmSpeed value when an option in the WPM dropdown is selected
   wpmSelector = (e) => {
     this.props.wpmSelector(e);
     this.resetReader(0);
-  }
-
-  // clears the timeout timer and resets it's time values
-  resetTime = () => {
-    clearTimeout(this.timeoutTimer);
-    this.setState({
-      currentTime: 0,
-      nextTime: 0
-    });
   }
 
   // initializes the state for the Block list
@@ -161,7 +122,7 @@ class SpeedReader extends React.Component {
       blockGroup: []
     });
 
-    this.resetTime();
+    this.props.resetTime();
   }
 
   render() {
@@ -534,7 +495,8 @@ class NextBlockTimer extends React.Component {
     nextTime: 0
   };
 
-  timeoutTimer = (isStarted, blockGroup, currentBlock) => {
+  timeoutTimer = (isStarted, blockGroupLength, currentBlock, selectNextBlock, pauseReader) => {
+    console.log(isStarted);
     const {
       currentTime
     } = this.state;
@@ -555,28 +517,23 @@ class NextBlockTimer extends React.Component {
 
       const nextBlock = currentBlock + 1;
 
-      if (nextBlock < blockGroup.length) {
-        this.setState({
-          displayText: blockGroup[nextBlock].props.text,
-          currentBlock: nextBlock,
-          blockGroup: ConvertTextToBlocks(
-            nextBlock,
-            this.props.editorText,
-            this.props.wordsPerBlock,
-            this.resetReader
-          )
-        });
+      if (nextBlock < blockGroupLength.length) {
+        selectNextBlock(nextBlock);
 
         setTimeout(
-          this.timeoutTimer,
+          this.timeoutTimer(
+            blockGroupLength,
+            currentBlock,
+            selectNextBlock,
+            pauseReader
+          ),
           this.state.nextTime - new Date().getTime()
         );
       } else {
         // let endStamp = new Date();
         // console.log(`End: ${endStamp.toString()}`);
-        this.setState({
-          isStarted: false
-        });
+
+        pauseReader();
         this.resetTime();
       }
     } else {
@@ -584,12 +541,18 @@ class NextBlockTimer extends React.Component {
     }
   }
 
+  resetTime = () => {
+    clearTimeout(this.timeoutTimer);
+    this.setState({
+      currentTime: 0,
+      nextTime: 0
+    });
+  }
+
   render() {
-    const { currentTime, nextTime } = this.state;
     return this.props.children(
-      currentTime,
-      nextTime,
-      this.timeoutTimer
+      this.timeoutTimer,
+      this.resetTime
     );
   }
 }
@@ -598,23 +561,32 @@ const DisplayReader = () => {
   return (
     <HandleEditorText>
       {(handleEditorText, editorText) => (
-        <DropdownSelector>
+        <NextBlockTimer>
           {(
-            blockSizeSelector,
-            wpmSelector,
-            wordsPerBlock,
-            wpmSpeed
+            timeoutTimer,
+            resetTime
           ) => (
-            <SpeedReader
-              handleEditorText={handleEditorText}
-              editorText={editorText}
-              blockSizeSelector={blockSizeSelector}
-              wpmSelector={wpmSelector}
-              wordsPerBlock={wordsPerBlock}
-              wpmSpeed={wpmSpeed}
-            />
+            <DropdownSelector>
+              {(
+                blockSizeSelector,
+                wpmSelector,
+                wordsPerBlock,
+                wpmSpeed
+              ) => (
+                <SpeedReader
+                  handleEditorText={handleEditorText}
+                  editorText={editorText}
+                  blockSizeSelector={blockSizeSelector}
+                  wpmSelector={wpmSelector}
+                  wordsPerBlock={wordsPerBlock}
+                  wpmSpeed={wpmSpeed}
+                  timeoutTimer={timeoutTimer}
+                  resetTime={resetTime}
+                />
+              )}
+            </DropdownSelector>
           )}
-        </DropdownSelector>
+        </NextBlockTimer>
       )}
     </HandleEditorText>
   );

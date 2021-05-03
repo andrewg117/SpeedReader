@@ -12,12 +12,6 @@ class SpeedReader extends React.Component {
     nextTime: 0
   };
 
-  // calculates the words per minute based on the selected seed from the WPM dropdown and block size from the Block Size dropdown
-  calcWPM = (wpm, blockSize) => {
-    const calc = (60 / wpm) * 1000 * blockSize;
-    return calc;
-  }
-
   // timer used to increment through the block list
   timeoutTimer = () => {
     const {
@@ -37,7 +31,7 @@ class SpeedReader extends React.Component {
 
       this.setState((state) => {
         return {
-          nextTime: state.nextTime + this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock)
+          nextTime: state.nextTime + CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock)
         };
       });
 
@@ -84,7 +78,7 @@ class SpeedReader extends React.Component {
     // console.log(`Start: ${startStamp.toString()}`);
 
     this.resetTime();
-    setTimeout(this.timeoutTimer, this.calcWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
+    setTimeout(this.timeoutTimer, CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock));
   }
 
   // resets the SpeedReader to default values
@@ -331,6 +325,10 @@ const ConvertTextToBlocks = (selectedID, editorText, wordsPerBlock, resetReader)
   return (blocksArr);
 }
 
+const CalculateWPM = (wpm, blockSize) => {
+  const calc = (60 / wpm) * 1000 * blockSize;
+  return calc;
+}
 
 const FullIcon = (props) => {
   return (
@@ -530,6 +528,82 @@ const DropdownOption = (props) => {
   );
 };
 
+class NextBlockTimer extends React.Component {
+  state = {
+    currentTime: 0,
+    nextTime: 0
+  };
+
+  timeoutTimer = (isStarted, blockGroup, currentBlock, selectNextBlock) => {
+    const {
+      currentTime
+    } = this.state;
+
+    if (isStarted) {
+      if (!currentTime) {
+        this.setState({
+          currentTime: new Date().getTime(),
+          nextTime: new Date().getTime()
+        });
+      }
+
+      this.setState((state) => {
+        return {
+          nextTime: state.nextTime + CalculateWPM(this.props.wpmSpeed, this.props.wordsPerBlock)
+        };
+      });
+
+      const nextBlock = currentBlock + 1;
+
+      if (nextBlock < blockGroup.length) {
+        selectNextBlock();
+        /* this.setState({
+          displayText: blockGroup[nextBlock].props.text,
+          currentBlock: nextBlock,
+          blockGroup: ConvertTextToBlocks(
+            nextBlock,
+            this.props.editorText,
+            this.props.wordsPerBlock,
+            this.resetReader
+          )
+        }); */
+
+        setTimeout(
+          this.timeoutTimer,
+          this.state.nextTime - new Date().getTime()
+        );
+      } else {
+        // let endStamp = new Date();
+        // console.log(`End: ${endStamp.toString()}`);
+        this.setState({
+          isStarted: false
+        });
+        this.resetTime();
+      }
+    } else {
+      this.resetTime();
+    }
+  }
+
+  resetTime = (pauseReader) => {
+    pauseReader();
+    clearTimeout(this.timeoutTimer);
+    this.setState({
+      currentTime: 0,
+      nextTime: 0
+    });
+  }
+
+  render() {
+    const { currentTime, nextTime } = this.state;
+    return this.props.children(
+      currentTime,
+      nextTime,
+      this.timeoutTimer,
+      this.resetTime
+    );
+  }
+}
 
 const DisplayReader = () => {
   return (
