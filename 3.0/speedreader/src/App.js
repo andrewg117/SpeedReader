@@ -1,6 +1,7 @@
 import './styles.css';
 // import './App.css';
-import DisplayReader from './components/SpeedReader';
+// import DisplayReader from './components/SpeedReader';
+import DisplayReader from './components/DisplayReader';
 
 function App() {
   return (
