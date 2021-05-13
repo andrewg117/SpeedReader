@@ -31,3 +31,8 @@ TODO: Clean-up code
 ## Goal
 > Implement SRP (Single Responsibility Principle) for each component
 > Create meaningful names for each variable and function to reduce the need for comments
+
+# Version 3.0
+
+## Goal
+> Rewrite class components to functions and implement Hooks.
