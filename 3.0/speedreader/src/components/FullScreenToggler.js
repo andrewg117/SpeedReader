@@ -22,11 +22,11 @@ export const useIsFull = () => {
   return useContext(IsFullContext);
 }
 
-const FullScreenToggler = ({children}) => {
-  const [ fullSelector, changeSelectorView ] = useState(() => {
+const FullScreenToggler = ({ children }) => {
+  const [fullSelector, changeSelectorView] = useState(() => {
     return false;
   });
-  const [ fullBlock, changeBlockView ] = useState(() => {
+  const [fullBlock, changeBlockView] = useState(() => {
     return false;
   });
 
@@ -40,7 +40,7 @@ const FullScreenToggler = ({children}) => {
 
   return (
     <ToggleFullScreenContext.Provider value={toggleFullScreen}>
-      <IsFullContext.Provider value={{fullSelector, fullBlock}}>
+      <IsFullContext.Provider value={{ fullSelector, fullBlock }}>
         {children}
       </IsFullContext.Provider>
     </ToggleFullScreenContext.Provider>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useText } from './Editor';
 import { useSelectedBlock, useChangeBlock } from './BlockSelector';
-import FullScreenToggler, { useToggleFullScreen, useIsFull, FullIcon } from './FullScreenToggler';
+import { useToggleFullScreen, useIsFull, FullIcon } from './FullScreenToggler';
 
 const Block = (props) => {
   const selectBlockOnClick = () => {
@@ -50,7 +50,7 @@ const useBlockGroup = () => {
   return useContext(BlockGroupContext);
 }
 
-const BlockGroup = ({children}) => {
+const BlockGroup = ({ children }) => {
   const text = useText();
   const selectedID = useSelectedBlock();
   const selectBlock = useChangeBlock();
@@ -69,7 +69,7 @@ const BlockGroup = ({children}) => {
     <BlockGroupContext.Provider value={blockGroup}>
       <section
         id="preview"
-      className={fullSelector ? "fullScreen" : "normal"}
+        className={fullSelector ? "fullScreen" : "normal"}
       >
         {blockGroup}
         <FullIcon iconID="fullPreview" toggle={toggleFullScreen} />
@@ -85,10 +85,10 @@ const SelectedBlockView = () => {
   const toggleFullScreen = useToggleFullScreen();
   const { fullBlock } = useIsFull();
 
-  const [ blockText, changeText ] = useState(() => {
+  const [blockText, changeText] = useState(() => {
     return blockGroup[selectedID].props.text;
   });
-  
+
   useEffect(() => {
     changeText(blockGroup[selectedID].props.text)
   }, [selectedID, blockGroup]);
@@ -96,7 +96,7 @@ const SelectedBlockView = () => {
   return (
     <section
       id="block-view"
-    className={fullBlock ? "fullScreen" : "normal"}
+      className={fullBlock ? "fullScreen" : "normal"}
     >
       {<p>{blockText}</p>}
       <FullIcon iconID="fullBlock" toggle={toggleFullScreen} />
@@ -106,11 +106,9 @@ const SelectedBlockView = () => {
 
 const DisplayBlocks = () => {
   return (
-    <FullScreenToggler>
-      <BlockGroup>
-        <SelectedBlockView />
-      </BlockGroup>
-    </FullScreenToggler>
+    <BlockGroup>
+      <SelectedBlockView />
+    </BlockGroup>
   );
 }
 
