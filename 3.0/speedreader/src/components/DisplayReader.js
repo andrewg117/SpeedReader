@@ -1,10 +1,11 @@
 import Editor from './Editor';
 import DisplayCount from './WordCounter';
-import BlockSelector from './BlockSelector';
 import DisplayBlocks from './DisplayBlocks';
-import DisplayUserInputs from './UserInput';
 import FullScreenToggler from './FullScreenToggler';
-import { DropdownSelector, ReaderControls } from './UserInput';
+import ReaderControls, { DropdownSelector, ToggleDropdownMenu } from './UserInput';
+import DisplayUserInputs from './DisplayUserInputs';
+import BlockSelector from './BlockSelector';
+import BlockGroup from './CreateBlocks';
 
 
 const DisplayReader = () => {
@@ -13,16 +14,20 @@ const DisplayReader = () => {
     <div id="main-container">
       <Editor>
         <BlockSelector>
-          <ReaderControls>
-            <DropdownSelector>
-              <FullScreenToggler>
-                <DisplayBlocks />
-                <DisplayUserInputs />
-              </FullScreenToggler>
-            </DropdownSelector>
-          </ReaderControls>
+          <DropdownSelector>
+            <BlockGroup>
+              <ReaderControls>
+                <FullScreenToggler>
+                  <ToggleDropdownMenu>
+                    <DisplayBlocks />
+                    <DisplayCount />
+                    <DisplayUserInputs />
+                  </ToggleDropdownMenu>
+                </FullScreenToggler>
+              </ReaderControls>
+            </BlockGroup>
+          </DropdownSelector>
         </BlockSelector>
-        <DisplayCount />
       </Editor>
     </div>
   );
