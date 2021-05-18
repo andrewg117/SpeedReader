@@ -6,6 +6,7 @@ import ReaderControls, { DropdownSelector, ToggleDropdownMenu } from './UserInpu
 import DisplayUserInputs from './DisplayUserInputs';
 import BlockSelector from './BlockSelector';
 import BlockGroup from './CreateBlocks';
+import NextBlockTimer from './NextBlockTimer';
 
 
 const DisplayReader = () => {
@@ -21,7 +22,9 @@ const DisplayReader = () => {
                   <ToggleDropdownMenu>
                     <DisplayBlocks />
                     <DisplayCount />
-                    <DisplayUserInputs />
+                    <NextBlockTimer>
+                      <DisplayUserInputs />
+                    </NextBlockTimer>
                   </ToggleDropdownMenu>
                 </FullScreenToggler>
               </ReaderControls>

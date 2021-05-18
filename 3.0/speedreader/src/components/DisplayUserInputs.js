@@ -1,13 +1,28 @@
 import React from 'react';
 import { useIsFull } from './FullScreenToggler';
 import { useIsStarted, useControl, useIsMenuOpen, useToggleMenu, useSelectValue, useOptions } from './UserInput';
+import { useChangeBlock } from './BlockSelector';
+// import {useTimer} from './NextBlockTimer';
 
 const InputButton = (props) => {
+  const changeSelected = useChangeBlock();
+  // const startTimer = useTimer();
+
   return (
     <button
       id={props.inputID}
       className={props.className}
-      onClick={props.readerControl}
+      onClick={() => {
+        props.readerControl();
+        if (props.id === "btnStart") {
+          let startStamp = new Date();
+          console.log(`Start: ${startStamp.toString()}`);
+          // startTimer();
+        }
+        if (props.id === "btnReset") {
+          changeSelected(0);
+        }
+      }}
     >
       {props.btnText}
     </button>
@@ -67,34 +82,36 @@ const DisplayUserInputs = () => {
       className={fullSelector || fullBlock ? "lower" : ""}
     >
       <InputButton
+        id="btnStart"
         className={"btn btn-light"}
         readerControl={startReader}
         btnText={isStarted ? "Pause" : "Start"}
       />
 
       <InputButton
+        id="btnReset"
         className={"btn btn-light"}
         readerControl={pauseReader}
         btnText={"Reset"}
       />
-      
-        <InputDropdown
-          dropdownID="blockDropdown"
-          readerControl={toggleBlockDropdown}
-          openMenu={blockMenuOpen}
-          btnText={`Block Size (${wordsPerBlock})`}
-          selector={blockSizeSelector}
-          options={blockSizeOptions}
-        />
 
-        <InputDropdown
-          dropdownID="wpmDropdown"
-          readerControl={toggleWPMDropdown}
-          openMenu={wpmMenuOpen}
-          btnText={`WPM (${wpmSpeed})`}
-          selector={wpmSelector}
-          options={wpsSpeedOptions}
-        />
+      <InputDropdown
+        dropdownID="blockDropdown"
+        readerControl={toggleBlockDropdown}
+        openMenu={blockMenuOpen}
+        btnText={`Block Size (${wordsPerBlock})`}
+        selector={blockSizeSelector}
+        options={blockSizeOptions}
+      />
+
+      <InputDropdown
+        dropdownID="wpmDropdown"
+        readerControl={toggleWPMDropdown}
+        openMenu={wpmMenuOpen}
+        btnText={`WPM (${wpmSpeed})`}
+        selector={wpmSelector}
+        options={wpsSpeedOptions}
+      />
     </section>
   );
 }

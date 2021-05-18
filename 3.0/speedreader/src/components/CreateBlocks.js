@@ -44,9 +44,13 @@ const ConvertTextToBlocks = (selectedID, editorText, wordsPerBlock, selectBlock)
 }
 
 const BlockGroupContext = React.createContext();
+const BlockTextContext = React.createContext();
 
 export const useBlockGroup = () => {
   return useContext(BlockGroupContext);
+}
+export const useBlockText = () => {
+  return useContext(BlockTextContext);
 }
 
 const BlockGroup = ({ children }) => {
@@ -58,25 +62,30 @@ const BlockGroup = ({ children }) => {
   const [blockGroup, updateBlocks] = useState(() => {
     return ConvertTextToBlocks(selectedID, text, wordsPerBlock, selectBlock);
   });
+  const [blockText, changeText] = useState(() => {
+    return blockGroup[selectedID].props.text;
+  });
 
   useEffect(() => {
     updateBlocks(ConvertTextToBlocks(selectedID, text, wordsPerBlock, selectBlock));
   }, [text, selectedID, selectBlock, wordsPerBlock]);
 
+  useEffect(() => {
+    changeText(blockGroup[selectedID].props.text)
+  }, [selectedID, blockGroup]);
+
   return (
     <BlockGroupContext.Provider value={blockGroup}>
-      {children}
+      <BlockTextContext.Provider value={blockText}>
+        {children}
+      </BlockTextContext.Provider>
     </BlockGroupContext.Provider>
   );
 }
 
-const BlockTextContext = React.createContext();
 
-export const useBlockText = () => {
-  return useContext(BlockTextContext);
-}
 
-export const SelectedBlock = ({children}) => {
+/* export const SelectedBlock = ({ children }) => {
   const blockGroup = useBlockGroup();
   const selectedID = useSelectedBlock();
 
@@ -93,6 +102,6 @@ export const SelectedBlock = ({children}) => {
       {children}
     </BlockTextContext.Provider>
   );
-}
+} */
 
 export default BlockGroup;
