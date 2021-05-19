@@ -26,35 +26,39 @@ const NextBlockTimer = ({ children }) => {
   const readerTimer = (selectedID) => {
     let nextTime = 0;
 
-    if (isStarted) {
-      if (!currentTime) {
-        changeCurrentTime(new Date().getTime());
-        nextTime = new Date().getTime();
-        // changeNextTime(new Date().getTime());
-      }
+    if (!currentTime) {
+      changeCurrentTime(new Date().getTime());
+      nextTime = new Date().getTime();
+      // changeNextTime(new Date().getTime());
+    }
 
-      nextTime = nextTime + CalculateWPM(wpmSpeed, wordsPerBlock);
-      // changeNextTime(state => state + CalculateWPM(wpmSpeed, wordsPerBlock));
-      console.log(nextTime);
+    nextTime += CalculateWPM(wpmSpeed, wordsPerBlock);
+    // changeNextTime(state => state + CalculateWPM(wpmSpeed, wordsPerBlock));
 
-      const nextBlock = selectedID + 1;
+    const nextBlock = selectedID + 1;
 
-      if (nextBlock < blockGroup.length) {
-        selectBlock(nextBlock);
+    if (nextBlock < blockGroup.length) {
+      selectBlock(nextBlock);
+      console.log(nextBlock);
 
-        setTimeout(
-          readerTimer(nextBlock),
-          nextTime - new Date().getTime()
-        );
-      } else {
-        let endStamp = new Date();
-        console.log(`End: ${endStamp.toString()}`);
-        pauseReader();
-        resetTimer();
-      }
+      setTimeout(
+        readerTimer(nextBlock),
+        nextTime - new Date().getTime()
+      );
     } else {
+      let endStamp = new Date();
+      console.log(`End: ${endStamp.toString()}`);
+      pauseReader();
       resetTimer();
     }
+
+  }
+  const startTimer = () => {
+    let startStamp = new Date();
+    console.log(`Start: ${startStamp.toString()}`);
+
+    resetTimer();
+    setTimeout(readerTimer(selectedID), CalculateWPM(wpmSpeed, wordsPerBlock));
   }
 
   const resetTimer = () => {
@@ -63,23 +67,15 @@ const NextBlockTimer = ({ children }) => {
     // changeNextTime(0);
   }
 
-  const startTimer = () => {
-    let startStamp = new Date();
-    console.log(`Start: ${startStamp.toString()}`);
-
-    resetTimer();
-    setTimeout(readerTimer, CalculateWPM(wpmSpeed, wordsPerBlock));
-  }
-
   useEffect(() => {
     if (isStarted) {
-      setTimeout(readerTimer(selectedID), CalculateWPM(wpmSpeed, wordsPerBlock));
+      startTimer();
     } else {
-      clearTimeout(readerTimer);
+      resetTimer();
     }
 
     return () => {
-      clearTimeout(readerTimer);
+      resetTimer();
     }
   }, [isStarted]);
 
