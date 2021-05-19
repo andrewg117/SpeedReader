@@ -15,9 +15,9 @@ const DisplayReader = () => {
     <div id="main-container">
       <Editor>
         <BlockSelector>
-          <DropdownSelector>
-            <BlockGroup>
-              <ReaderControls>
+          <ReaderControls>
+            <DropdownSelector>
+              <BlockGroup>
                 <FullScreenToggler>
                   <ToggleDropdownMenu>
                     <DisplayBlocks />
@@ -27,9 +27,9 @@ const DisplayReader = () => {
                     </NextBlockTimer>
                   </ToggleDropdownMenu>
                 </FullScreenToggler>
-              </ReaderControls>
-            </BlockGroup>
-          </DropdownSelector>
+              </BlockGroup>
+            </DropdownSelector>
+          </ReaderControls>
         </BlockSelector>
       </Editor>
     </div>

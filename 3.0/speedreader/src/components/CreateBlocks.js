@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useText } from './Editor';
-import { useSelectedBlock, useChangeBlock } from './BlockSelector';
-import { useSelectValue } from './UserInput';
+import { useSelectedBlock } from './BlockSelector';
+import { useSelectValue, useControl } from './UserInput';
 
 const Block = (props) => {
+  const { pauseReader } = useControl();
   const selectBlockOnClick = () => {
     props.selectBlockOnClick(props.id);
+    pauseReader();
   };
 
   return (
@@ -55,8 +57,7 @@ export const useBlockText = () => {
 
 const BlockGroup = ({ children }) => {
   const text = useText();
-  const selectedID = useSelectedBlock();
-  const selectBlock = useChangeBlock();
+  const { selectedID, selectBlock } = useSelectedBlock();
   const { wordsPerBlock } = useSelectValue();
 
   const [blockGroup, updateBlocks] = useState(() => {
@@ -82,26 +83,5 @@ const BlockGroup = ({ children }) => {
     </BlockGroupContext.Provider>
   );
 }
-
-
-
-/* export const SelectedBlock = ({ children }) => {
-  const blockGroup = useBlockGroup();
-  const selectedID = useSelectedBlock();
-
-  const [blockText, changeText] = useState(() => {
-    return blockGroup[selectedID].props.text;
-  });
-
-  useEffect(() => {
-    changeText(blockGroup[selectedID].props.text)
-  }, [selectedID, blockGroup]);
-
-  return (
-    <BlockTextContext.Provider value={blockText}>
-      {children}
-    </BlockTextContext.Provider>
-  );
-} */
 
 export default BlockGroup;

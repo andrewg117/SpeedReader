@@ -1,12 +1,12 @@
 import React from 'react';
 import { useIsFull } from './FullScreenToggler';
-import { useIsStarted, useControl, useIsMenuOpen, useToggleMenu, useSelectValue, useOptions } from './UserInput';
-import { useChangeBlock } from './BlockSelector';
-// import {useTimer} from './NextBlockTimer';
+import { useControl, useIsMenuOpen, useToggleMenu, useSelectValue, useOptions } from './UserInput';
+import { useSelectedBlock } from './BlockSelector';
+import { useTimer } from './NextBlockTimer';
 
 const InputButton = (props) => {
-  const changeSelected = useChangeBlock();
-  // const startTimer = useTimer();
+  const { selectBlock } = useSelectedBlock();
+  const { startTimer, resetTimer } = useTimer();
 
   return (
     <button
@@ -20,7 +20,8 @@ const InputButton = (props) => {
           // startTimer();
         }
         if (props.id === "btnReset") {
-          changeSelected(0);
+          selectBlock(0);
+          resetTimer();
         }
       }}
     >
@@ -65,8 +66,7 @@ const InputDropdown = (props) => {
 
 const DisplayUserInputs = () => {
   const { fullSelector, fullBlock } = useIsFull();
-  const isStarted = useIsStarted();
-  const { startReader, pauseReader } = useControl();
+  const { isStarted, startReader, pauseReader } = useControl();
   const { blockMenuOpen, wpmMenuOpen } = useIsMenuOpen();
   const { toggleBlockDropdown, toggleWPMDropdown } = useToggleMenu();
   const { wordsPerBlock, wpmSpeed } = useSelectValue();

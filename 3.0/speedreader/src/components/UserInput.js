@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useSelectedBlock } from './BlockSelector';
 
-const IsStartedContext = React.createContext();
 const ControlContext = React.createContext();
 
-export const useIsStarted = () => {
-  return useContext(IsStartedContext);
-}
 export const useControl = () => {
   return useContext(ControlContext);
 }
@@ -16,7 +13,7 @@ export const ReaderControls = ({ children }) => {
   });
 
   const startReader = () => {
-    toggleStarted((state) => !state);
+    toggleStarted(!isStarted);
   }
 
   const pauseReader = () => {
@@ -24,11 +21,9 @@ export const ReaderControls = ({ children }) => {
   }
 
   return (
-    <IsStartedContext.Provider value={isStarted}>
-      <ControlContext.Provider value={{ startReader, pauseReader }}>
-        {children}
-      </ControlContext.Provider>
-    </IsStartedContext.Provider>
+    <ControlContext.Provider value={{ isStarted, startReader, pauseReader }}>
+      {children}
+    </ControlContext.Provider>
   );
 }
 
@@ -92,6 +87,9 @@ export const useOptions = () => {
 }
 
 export const DropdownSelector = ({ children }) => {
+  const { pauseReader } = useControl();
+  const { selectBlock } = useSelectedBlock();
+
   const [wordsPerBlock, selectSize] = useState(() => {
     return 1;
   });
@@ -99,13 +97,16 @@ export const DropdownSelector = ({ children }) => {
     return 100;
   });
 
-
   const blockSizeSelector = (e) => {
     selectSize(parseInt(e.target.innerText));
+    selectBlock(0);
+    pauseReader();
   }
 
   const wpmSelector = (e) => {
     selectWPM(parseInt(e.target.innerText));
+    selectBlock(0);
+    pauseReader();
   }
 
   return (
