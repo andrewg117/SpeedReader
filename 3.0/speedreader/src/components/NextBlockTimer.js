@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { useSelectedBlock } from './BlockSelector';
 import { useBlockGroup } from './CreateBlocks';
 import { useControl, useSelectValue } from './UserInput';
@@ -19,40 +19,41 @@ const NextBlockTimer = ({ children }) => {
   const { wordsPerBlock, wpmSpeed } = useSelectValue();
   const { selectedID, selectBlock } = useSelectedBlock();
   const blockGroup = useBlockGroup();
+  const timerRef = useRef(0);
 
-  const [currentTime, changeCurrentTime] = useState(0);
-  // const [nextTime, changeNextTime] = useState(0);
+  const [currentTime, changeCurrentTime] = useState(() => 0);
+  const [nextTime, changeNextTime] = useState(() => 0);
 
-  const readerTimer = (selectedID) => {
-    let nextTime = 0;
+  const readerTimer = useCallback((selectedID) => {
+    if (isStarted) {
+      if (!currentTime) {
+        changeCurrentTime(new Date().getTime());
+        changeNextTime(new Date().getTime());
+      }
 
-    if (!currentTime) {
-      changeCurrentTime(new Date().getTime());
-      nextTime = new Date().getTime();
-      // changeNextTime(new Date().getTime());
+      changeNextTime(nextTime + CalculateWPM(wpmSpeed, wordsPerBlock));
+
+      const nextBlock = selectedID + 1;
+
+      if (nextBlock < blockGroup.length) {
+        selectBlock(nextBlock);
+
+        timerRef.current = setTimeout(() => {
+          readerTimer(nextBlock);
+        }, nextTime - new Date().getTime());
+      } else {
+        let endStamp = new Date();
+        console.log(`End: ${endStamp.toString()}`);
+        clearTimeout(timerRef.current);
+        timerRef.current = 0;
+        changeCurrentTime(0);
+        changeNextTime(0);
+        pauseReader();
+      }
     }
 
-    nextTime += CalculateWPM(wpmSpeed, wordsPerBlock);
-    // changeNextTime(state => state + CalculateWPM(wpmSpeed, wordsPerBlock));
+  }, [isStarted, nextTime, blockGroup.length, currentTime, selectBlock, wordsPerBlock, wpmSpeed, pauseReader]);
 
-    const nextBlock = selectedID + 1;
-
-    if (nextBlock < blockGroup.length) {
-      selectBlock(nextBlock);
-      console.log(nextBlock);
-
-      setTimeout(
-        readerTimer(nextBlock),
-        nextTime - new Date().getTime()
-      );
-    } else {
-      let endStamp = new Date();
-      console.log(`End: ${endStamp.toString()}`);
-      pauseReader();
-      resetTimer();
-    }
-
-  }
   const startTimer = () => {
     let startStamp = new Date();
     console.log(`Start: ${startStamp.toString()}`);
@@ -61,27 +62,37 @@ const NextBlockTimer = ({ children }) => {
     setTimeout(readerTimer(selectedID), CalculateWPM(wpmSpeed, wordsPerBlock));
   }
 
-  const resetTimer = () => {
-    clearTimeout(readerTimer);
+  const pauseTimer = () => {
+    clearTimeout(timerRef.current);
+    timerRef.current = 0;
     changeCurrentTime(0);
-    // changeNextTime(0);
+    changeNextTime(0);
+  }
+
+  const resetTimer = () => {
+    pauseTimer();
+    
+    let resetCount = setTimeout(() => selectBlock(0), 300);
+    return () => clearTimeout(resetCount);
   }
 
   useEffect(() => {
     if (isStarted) {
-      startTimer();
-    } else {
-      resetTimer();
+      timerRef.current = setTimeout(() => {
+        readerTimer(selectedID);
+      }, CalculateWPM(wpmSpeed, wordsPerBlock));
     }
 
     return () => {
-      resetTimer();
+      clearTimeout(timerRef.current);
+      timerRef.current = 0;
+      changeCurrentTime(0);
+      changeNextTime(0);
     }
-  }, [isStarted]);
+  }, [isStarted, readerTimer, selectedID, wordsPerBlock, wpmSpeed]);
 
   return (
     <TimerContext.Provider value={{ startTimer, resetTimer }}>
-      <div style={{ color: 'white' }}>{`${isStarted}`}</div>
       {children}
     </TimerContext.Provider>
   );

@@ -1,12 +1,10 @@
 import React from 'react';
 import { useIsFull } from './FullScreenToggler';
 import { useControl, useIsMenuOpen, useToggleMenu, useSelectValue, useOptions } from './UserInput';
-import { useSelectedBlock } from './BlockSelector';
 import { useTimer } from './NextBlockTimer';
 
 const InputButton = (props) => {
-  const { selectBlock } = useSelectedBlock();
-  const { startTimer, resetTimer } = useTimer();
+  const { resetTimer } = useTimer();
 
   return (
     <button
@@ -20,7 +18,6 @@ const InputButton = (props) => {
           // startTimer();
         }
         if (props.id === "btnReset") {
-          selectBlock(0);
           resetTimer();
         }
       }}
