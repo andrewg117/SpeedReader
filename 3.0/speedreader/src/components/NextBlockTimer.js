@@ -4,7 +4,7 @@ import { useBlockGroup } from './CreateBlocks';
 import { useControl, useSelectValue } from './UserInput';
 
 const CalculateWPM = (wpm, blockSize) => {
-  const calc = (60 / wpm) * 1000 * blockSize;
+  const calc = ((60 / wpm) * 1000) * blockSize;
   return calc;
 }
 
@@ -25,33 +25,34 @@ const NextBlockTimer = ({ children }) => {
   const [nextTime, changeNextTime] = useState(() => 0);
 
   const readerTimer = useCallback((selectedID) => {
-    if (isStarted) {
-      if (!currentTime) {
-        changeCurrentTime(new Date().getTime());
-        changeNextTime(new Date().getTime());
-      }
-
-      changeNextTime(nextTime + CalculateWPM(wpmSpeed, wordsPerBlock));
-
-      const nextBlock = selectedID + 1;
-
-      if (nextBlock < blockGroup.length) {
-        selectBlock(nextBlock);
-
-        timerRef.current = setTimeout(() => {
-          readerTimer(nextBlock);
-        }, nextTime - new Date().getTime());
-      } else {
-        let endStamp = new Date();
-        console.log(`End: ${endStamp.toString()}`);
-        clearTimeout(timerRef.current);
-        timerRef.current = 0;
-        changeCurrentTime(0);
-        changeNextTime(0);
-        pauseReader();
-      }
+    if (!currentTime) {
+      let newStamp = new Date().getTime();
+      changeCurrentTime(newStamp);
+      changeNextTime(newStamp);
     }
 
+    changeNextTime(nextTime + CalculateWPM(wpmSpeed, wordsPerBlock));
+
+    // BUG: timers not updating correctly
+    /* let diff = (new Date().getTime() - currentTime) % CalculateWPM(wpmSpeed, wordsPerBlock);
+    console.log(`${selectedID}: ${diff} ms`); */
+
+    const nextBlock = selectedID + 1;
+
+    if (nextBlock < blockGroup.length) {
+      selectBlock(nextBlock);
+
+      timerRef.current = setTimeout(() => {
+        readerTimer(selectedID)
+      }, nextTime - new Date().getTime());
+    } else {
+      let endStamp = new Date();
+      console.log(`End: ${endStamp.toString()}`);
+      clearTimeout(timerRef.current);
+      timerRef.current = 0;
+      pauseTimer();
+      pauseReader();
+    }
   }, [isStarted, nextTime, blockGroup.length, currentTime, selectBlock, wordsPerBlock, wpmSpeed, pauseReader]);
 
   const startTimer = () => {
@@ -59,7 +60,6 @@ const NextBlockTimer = ({ children }) => {
     console.log(`Start: ${startStamp.toString()}`);
 
     resetTimer();
-    setTimeout(readerTimer(selectedID), CalculateWPM(wpmSpeed, wordsPerBlock));
   }
 
   const pauseTimer = () => {
@@ -71,8 +71,8 @@ const NextBlockTimer = ({ children }) => {
 
   const resetTimer = () => {
     pauseTimer();
-    
-    let resetCount = setTimeout(() => selectBlock(0), 300);
+
+    let resetCount = setTimeout(() => selectBlock(0), 400);
     return () => clearTimeout(resetCount);
   }
 
@@ -86,10 +86,8 @@ const NextBlockTimer = ({ children }) => {
     return () => {
       clearTimeout(timerRef.current);
       timerRef.current = 0;
-      changeCurrentTime(0);
-      changeNextTime(0);
     }
-  }, [isStarted, readerTimer, selectedID, wordsPerBlock, wpmSpeed]);
+  }, [isStarted, selectedID, wordsPerBlock, wpmSpeed, readerTimer]);
 
   return (
     <TimerContext.Provider value={{ startTimer, resetTimer }}>

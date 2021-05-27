@@ -15,7 +15,6 @@ const InputButton = (props) => {
         if (props.id === "btnStart") {
           let startStamp = new Date();
           console.log(`Start: ${startStamp.toString()}`);
-          // startTimer();
         }
         if (props.id === "btnReset") {
           resetTimer();

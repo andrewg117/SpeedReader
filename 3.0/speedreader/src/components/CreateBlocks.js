@@ -6,8 +6,9 @@ import { useSelectValue, useControl } from './UserInput';
 const Block = (props) => {
   const { pauseReader } = useControl();
   const selectBlockOnClick = () => {
-    props.selectBlockOnClick(props.id);
     pauseReader();
+    let delayBlock = setTimeout(() => props.selectBlockOnClick(props.id), 500);
+    return () => clearTimeout(delayBlock);
   };
 
   return (
