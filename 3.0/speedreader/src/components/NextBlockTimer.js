@@ -1,10 +1,10 @@
-import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
+import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { useSelectedBlock } from './BlockSelector';
 import { useBlockGroup } from './CreateBlocks';
 import { useControl, useSelectValue } from './UserInput';
 
 const CalculateWPM = (wpm, blockSize) => {
-  const calc = ((60 / wpm) * 1000) * blockSize;
+  const calc = (60 / wpm) * 1000 * blockSize;
   return calc;
 }
 
@@ -19,32 +19,38 @@ const NextBlockTimer = ({ children }) => {
   const { wordsPerBlock, wpmSpeed } = useSelectValue();
   const { selectedID, selectBlock } = useSelectedBlock();
   const blockGroup = useBlockGroup();
+  
   const timerRef = useRef(0);
+  const currentTime = useRef(0);
+  const nextTime = useRef(0);
 
-  const [currentTime, changeCurrentTime] = useState(() => 0);
-  const [nextTime, changeNextTime] = useState(() => 0);
+  // const [currentTime, changeCurrentTime] = useState(() => 0);
+  // const [nextTime, changeNextTime] = useState(() => 0);
 
   const readerTimer = useCallback((selectedID) => {
-    if (!currentTime) {
+    if (!currentTime.current) {
       let newStamp = new Date().getTime();
-      changeCurrentTime(newStamp);
-      changeNextTime(newStamp);
+      currentTime.current = newStamp;
+      nextTime.current = newStamp;
+      // changeCurrentTime(newStamp);
+      // changeNextTime(newStamp);
     }
 
-    changeNextTime(nextTime + CalculateWPM(wpmSpeed, wordsPerBlock));
+    nextTime.current = nextTime.current + CalculateWPM(wpmSpeed, wordsPerBlock);
+    // changeNextTime((state) => state + CalculateWPM(wpmSpeed, wordsPerBlock));
 
     // BUG: timers not updating correctly
-    /* let diff = (new Date().getTime() - currentTime) % CalculateWPM(wpmSpeed, wordsPerBlock);
+    /* let diff = (new Date().getTime() - currentTime.current) % CalculateWPM(wpmSpeed, wordsPerBlock);
     console.log(`${selectedID}: ${diff} ms`); */
 
     const nextBlock = selectedID + 1;
 
-    if (nextBlock < blockGroup.length) {
+    if (isStarted && nextBlock < blockGroup.length) {
       selectBlock(nextBlock);
 
       timerRef.current = setTimeout(() => {
         readerTimer(selectedID)
-      }, nextTime - new Date().getTime());
+      }, nextTime.current  - new Date().getTime());
     } else {
       let endStamp = new Date();
       console.log(`End: ${endStamp.toString()}`);
@@ -65,8 +71,10 @@ const NextBlockTimer = ({ children }) => {
   const pauseTimer = () => {
     clearTimeout(timerRef.current);
     timerRef.current = 0;
-    changeCurrentTime(0);
-    changeNextTime(0);
+    currentTime.current = 0;
+    nextTime.current = 0;
+    // changeCurrentTime(0);
+    // changeNextTime(0);
   }
 
   const resetTimer = () => {
@@ -77,7 +85,7 @@ const NextBlockTimer = ({ children }) => {
   }
 
   useEffect(() => {
-    if (isStarted) {
+    if (isStarted && timerRef.current === 0) {
       timerRef.current = setTimeout(() => {
         readerTimer(selectedID);
       }, CalculateWPM(wpmSpeed, wordsPerBlock));
