@@ -100,15 +100,13 @@ export const DropdownSelector = ({ children }) => {
   const blockSizeSelector = (e) => {
     selectSize(parseInt(e.target.innerText));
     pauseReader();
-    let delayBlock = setTimeout(() => selectBlock(0), 500);
-    return () => clearTimeout(delayBlock);
+    selectBlock(0);
   }
 
   const wpmSelector = (e) => {
     selectWPM(parseInt(e.target.innerText));
     pauseReader();
-    let delayBlock = setTimeout(() => selectBlock(0), 500);
-    return () => clearTimeout(delayBlock);
+    selectBlock(0);
 
   }
 
