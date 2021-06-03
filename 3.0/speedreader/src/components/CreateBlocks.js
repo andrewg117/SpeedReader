@@ -7,8 +7,7 @@ const Block = (props) => {
   const { pauseReader } = useControl();
   const selectBlockOnClick = () => {
     pauseReader();
-    let delayBlock = setTimeout(() => props.selectBlockOnClick(props.id), 500);
-    return () => clearTimeout(delayBlock);
+    props.selectBlockOnClick(props.id);
   };
 
   return (
