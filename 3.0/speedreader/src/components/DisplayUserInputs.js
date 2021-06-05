@@ -26,6 +26,15 @@ const InputButton = (props) => {
   );
 };
 
+const ValueInput = (props) => {
+  return (
+    <>
+      <label>{props.btnText}</label>
+      <input value={props.selector} defaultValue={100}></input>
+    </>
+  );
+}
+
 const DropdownOption = (props) => {
   return (
     <li className="dropdown-item" onClick={props.selector}>
@@ -91,6 +100,11 @@ const DisplayUserInputs = () => {
         btnText={"Reset"}
       />
 
+      {/* <ValueInput
+        dropdownID="blockDropdown"
+        btnText={`Block Size (${wordsPerBlock})`}
+        selector={blockSizeSelector}
+      /> */}
       <InputDropdown
         dropdownID="blockDropdown"
         readerControl={toggleBlockDropdown}
