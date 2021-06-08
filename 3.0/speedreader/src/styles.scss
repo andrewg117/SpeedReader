@@ -149,6 +149,20 @@ body {
       font-weight: bold;
       margin: 0 .8em .8em 0;
     }
+
+    label {
+      color: white; 
+      font-weight: bold;
+      margin: 0 .8em .8em 0;
+    }
+
+    #wpmDropdown {
+      max-width: 5em;
+      width: fit-content;
+      margin-left: .5em;
+      padding: .3em;
+      font-weight: bold;
+    } 
   }
   .lower {
     position: fixed;

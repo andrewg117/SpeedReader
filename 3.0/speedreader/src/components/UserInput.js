@@ -104,7 +104,9 @@ export const DropdownSelector = ({ children }) => {
   }
 
   const wpmSelector = (e) => {
-    selectWPM(parseInt(e.target.innerText));
+    if(e.target.value >= 100 && e.target.value <= 1000){
+      selectWPM(e.target.value);
+    }
     pauseReader();
     selectBlock(0);
 

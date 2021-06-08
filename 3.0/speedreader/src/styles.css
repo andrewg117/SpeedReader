@@ -169,6 +169,22 @@ body i {
   margin: 0 .8em .8em 0;
 }
 
+#main-container #input-view label {
+  color: white;
+  font-weight: bold;
+  margin: 0 .8em .8em 0;
+}
+
+#main-container #input-view #wpmDropdown {
+  max-width: 5em;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-left: .5em;
+  padding: .3em;
+  font-weight: bold;
+}
+
 #main-container .lower {
   position: fixed;
   bottom: 0;

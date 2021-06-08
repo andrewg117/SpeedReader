@@ -29,8 +29,17 @@ const InputButton = (props) => {
 const ValueInput = (props) => {
   return (
     <>
-      <label>{props.btnText}</label>
-      <input value={props.selector} defaultValue={100}></input>
+      <label for={props.dropdownID}>{props.btnText}:
+        <input
+          id={props.dropdownID}
+          type="number"
+          defaultValue={100}
+          value={props.wordsPerBlock}
+          onChange={props.selector}
+          min={100}
+          max={1000}
+        />
+      </label>
     </>
   );
 }
@@ -100,11 +109,6 @@ const DisplayUserInputs = () => {
         btnText={"Reset"}
       />
 
-      {/* <ValueInput
-        dropdownID="blockDropdown"
-        btnText={`Block Size (${wordsPerBlock})`}
-        selector={blockSizeSelector}
-      /> */}
       <InputDropdown
         dropdownID="blockDropdown"
         readerControl={toggleBlockDropdown}
@@ -114,14 +118,21 @@ const DisplayUserInputs = () => {
         options={blockSizeOptions}
       />
 
-      <InputDropdown
+      <ValueInput
+        dropdownID="wpmDropdown"
+        btnText={`WPM (${wpmSpeed})`}
+        selector={wpmSelector}
+        value={wpmSpeed}
+      />
+
+      {/* <InputDropdown
         dropdownID="wpmDropdown"
         readerControl={toggleWPMDropdown}
         openMenu={wpmMenuOpen}
         btnText={`WPM (${wpmSpeed})`}
         selector={wpmSelector}
         options={wpsSpeedOptions}
-      />
+      /> */}
     </section>
   );
 }
