@@ -6,6 +6,9 @@
 > Create a interactive speed reader that takes text input and shows the output. 
 > The output will be both full and single word. 
 
+## Preview
+![Speed Reader](https://github.com/andrewg117/SpeedReader/blob/main/speedReaderPreview.JPG)
+
 ___
 ## Tasks:
 ```
