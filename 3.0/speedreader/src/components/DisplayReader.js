@@ -8,6 +8,10 @@ import BlockSelector from './BlockSelector';
 import BlockGroup from './CreateBlocks';
 import NextBlockTimer from './NextBlockTimer';
 
+const minMax = {
+  min: 100,
+  max: 1000
+}
 
 const DisplayReader = () => {
   return (
@@ -16,14 +20,14 @@ const DisplayReader = () => {
       <Editor>
         <BlockSelector>
           <ReaderControls>
-            <DropdownSelector>
+            <DropdownSelector minMax={minMax}>
               <BlockGroup>
                 <FullScreenToggler>
                   <ToggleDropdownMenu>
                     <DisplayBlocks />
                     <DisplayCount />
                     <NextBlockTimer>
-                      <DisplayUserInputs />
+                      <DisplayUserInputs minMax={minMax} />
                     </NextBlockTimer>
                   </ToggleDropdownMenu>
                 </FullScreenToggler>

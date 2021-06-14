@@ -33,11 +33,11 @@ const ValueInput = (props) => {
         <input
           id={props.dropdownID}
           type="number"
-          defaultValue={100}
+          defaultValue={props.minMax.min}
           value={props.wordsPerBlock}
           onChange={props.selector}
-          min={100}
-          max={1000}
+          min={props.minMax.min}
+          max={props.minMax.max}
         />
       </label>
     </>
@@ -78,17 +78,16 @@ const InputDropdown = (props) => {
   );
 };
 
-const DisplayUserInputs = () => {
+const DisplayUserInputs = ({minMax}) => {
   const { fullSelector, fullBlock } = useIsFull();
   const { isStarted, startReader, pauseReader } = useControl();
-  const { blockMenuOpen, wpmMenuOpen } = useIsMenuOpen();
-  const { toggleBlockDropdown, toggleWPMDropdown } = useToggleMenu();
+  const { blockMenuOpen } = useIsMenuOpen();
+  const { toggleBlockDropdown } = useToggleMenu();
   const { wordsPerBlock, wpmSpeed } = useSelectValue();
   const { blockSizeSelector, wpmSelector } = useOptions();
 
 
-  const blockSizeOptions = [1, 2, 3, 4];
-  const wpsSpeedOptions = [100, 200, 300, 400];
+  const blockSizeOptions = [1, 2, 3, 4, 5];
 
   return (
     <section
@@ -123,6 +122,7 @@ const DisplayUserInputs = () => {
         btnText={`WPM (${wpmSpeed})`}
         selector={wpmSelector}
         value={wpmSpeed}
+        minMax={minMax}
       />
 
       {/* <InputDropdown

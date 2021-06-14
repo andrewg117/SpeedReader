@@ -86,7 +86,7 @@ export const useOptions = () => {
   return useContext(OptionsContext);
 }
 
-export const DropdownSelector = ({ children }) => {
+export const DropdownSelector = ({ children, minMax }) => {
   const { pauseReader } = useControl();
   const { selectBlock } = useSelectedBlock();
 
@@ -104,7 +104,7 @@ export const DropdownSelector = ({ children }) => {
   }
 
   const wpmSelector = (e) => {
-    if(e.target.value >= 100 && e.target.value <= 1000){
+    if(e.target.value >= minMax.min && e.target.value <= minMax.max){
       selectWPM(e.target.value);
     }
     pauseReader();
