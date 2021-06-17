@@ -106,7 +106,7 @@ export const DropdownSelector = ({ children, minMax }) => {
   const wpmSelector = (e) => {
     if(e.target.value >= minMax.min && e.target.value <= minMax.max){
       selectWPM(e.target.value);
-    }
+    } 
     pauseReader();
     selectBlock(0);
 

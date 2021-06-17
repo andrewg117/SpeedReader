@@ -36,6 +36,11 @@ const ValueInput = (props) => {
           defaultValue={props.minMax.min}
           value={props.wordsPerBlock}
           onChange={props.selector}
+          onKeyDown={e => {
+            if(e.key.match(/\D/)) {
+              e.preventDefault();
+            }
+          }}
           min={props.minMax.min}
           max={props.minMax.max}
         />
