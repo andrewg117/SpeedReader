@@ -15,7 +15,7 @@ const DisplayBlocks = () => {
         id="preview"
         className={fullSelector ? "fullScreen" : "normal"}
       >
-        {blockGroup}
+        {fullBlock ? null : blockGroup}
         <FullIcon iconID="fullPreview" toggle={toggleFullScreen} />
       </section>
 
@@ -23,7 +23,7 @@ const DisplayBlocks = () => {
         id="block-view"
         className={fullBlock ? "fullScreen" : "normal"}
       >
-        {<p>{blockText}</p>}
+        {fullSelector ? null : <p>{ blockText}</p>}
         <FullIcon iconID="fullBlock" toggle={toggleFullScreen} />
       </section>
     </BlockSelector>
