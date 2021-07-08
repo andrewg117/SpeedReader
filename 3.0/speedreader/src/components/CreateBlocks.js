@@ -71,9 +71,13 @@ const BlockGroup = ({ children }) => {
     updateBlocks(ConvertTextToBlocks(selectedID, text, wordsPerBlock, selectBlock));
   }, [text, selectedID, selectBlock, wordsPerBlock]);
 
-  // BUG: Can't delete the editor text
+  // FIXED: Can't delete the editor text
   useEffect(() => {
-    changeText(blockGroup[selectedID].props.text)
+    if(typeof blockGroup[selectedID] !== 'undefined'){
+      changeText(blockGroup[selectedID].props.text)
+    } else{
+      changeText("Enter Text");
+    }
   }, [selectedID, blockGroup]);
 
   return (
