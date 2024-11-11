@@ -2,6 +2,7 @@ import React from 'react';
 import { useIsFull } from './FullScreenToggler';
 import { useControl, useIsMenuOpen, useToggleMenu, useSelectValue, useOptions } from './UserInput';
 import { useTimer } from './NextBlockTimer';
+import '../styles.css'
 
 const InputButton = (props) => {
   const { resetTimer } = useTimer();
@@ -29,7 +30,7 @@ const InputButton = (props) => {
 const ValueInput = (props) => {
   return (
     <>
-      <label for={props.dropdownID}>{props.btnText}:
+      <label htmlFor={props.dropdownID}>{props.btnText}:
         <input
           id={props.dropdownID}
           type="number"
