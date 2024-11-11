@@ -3,12 +3,11 @@ body {
   padding: 0;
   background-color: #0a0a10;
 }
-
 body i {
   position: absolute;
   top: 0;
   right: 0;
-  padding: .5em;
+  padding: 0.5em;
   font-size: 1.5em;
   opacity: 0.5;
 }
@@ -19,36 +18,28 @@ body i {
   min-height: 600px;
   margin: 2em auto;
   padding: 1em;
-  display: -ms-grid;
   display: grid;
 }
-
 @media (min-width: 900px) {
   #main-container {
-    -ms-grid-columns: 2fr 1fr;
-        grid-template-columns: 2fr 1fr;
-    -ms-grid-rows: auto;
-        grid-template-rows: auto;
-        grid-template-areas: "editor editor" "preview block" "count count" "input input";
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "editor editor" "preview block" "count count" "input input";
     grid-column-gap: 1em;
     grid-row-gap: 1em;
   }
 }
-
 @media (max-width: 900px) {
   #main-container {
-    -ms-grid-columns: 1fr;
-        grid-template-columns: 1fr;
-    -ms-grid-rows: auto;
-        grid-template-rows: auto;
-        grid-template-areas: "editor" "preview" "block" "count" "input";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "editor" "preview" "block" "count" "input";
     grid-row-gap: 1em;
   }
   #main-container #block-view h1 {
     font-size: 0.8em;
   }
 }
-
 #main-container #editor {
   grid-area: editor;
   font-size: 1.5em;
@@ -56,7 +47,6 @@ body i {
   padding: 0.5em;
   min-height: 300px;
 }
-
 #main-container .fullScreen {
   position: fixed;
   top: 0;
@@ -65,26 +55,19 @@ body i {
   height: 80vh;
   z-index: 10;
 }
-
 @media (max-width: 900px) {
   #main-container .fullScreen {
     height: 75vh;
   }
 }
-
 #main-container .normal {
   position: relative;
 }
-
 #main-container #preview {
   grid-area: preview;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -ms-flex-line-pack: start;
-      align-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
   min-height: 300px;
   padding: 1em;
   background-color: #e9e9f5;
@@ -92,46 +75,33 @@ body i {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 #main-container #preview::-webkit-scrollbar {
   display: none;
 }
-
 #main-container #preview #textBlock {
   font-size: 1.3em;
   margin: 0 0.5em 0.2em 0;
 }
-
 #main-container #preview #textBlock:hover {
   padding: 0.1em;
   color: white;
   background: #0a0a10;
 }
-
 #main-container #preview .isActive {
   padding: 0.1em;
   color: white;
   background: #0a0a10;
 }
-
 #main-container #block-view {
   grid-area: block;
   background-color: #e9e9f5;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: center;
+  align-items: center;
 }
-
 #main-container #block-view p {
   font-size: 3em;
 }
-
 @media (max-width: 900px) {
   #main-container #block-view {
     padding: 2em;
@@ -140,44 +110,30 @@ body i {
     font-size: 1.5em;
   }
 }
-
 #main-container #wordCount {
   grid-area: count;
   color: white;
   text-align: center;
   font-size: 1.5em;
 }
-
 #main-container #input-view {
   grid-area: input;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   margin: 1em;
 }
-
 #main-container #input-view button {
   font-weight: bold;
-  margin: 0 .8em .8em 0;
+  margin: 0 0.8em 0.8em 0;
 }
-
 #main-container .lower {
   position: fixed;
   bottom: 0;
   width: 90vw;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
   padding: 1em;
   z-index: 40;
   background-color: #0a0a10;
-}
-/*# sourceMappingURL=style.css.map */
+}/*# sourceMappingURL=style.css.map */

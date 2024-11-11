@@ -1,0 +1,95 @@
+import React, { useContext, useEffect, useCallback, useRef } from 'react';
+import { useSelectedBlock } from './BlockSelector';
+import { useBlockGroup } from './CreateBlocks';
+import { useControl, useSelectValue } from './UserInput';
+
+const CalculateWPM = (wpm, blockSize) => {
+  const calc = (60 / wpm) * 1000 * blockSize;
+  return calc;
+}
+
+const TimerContext = React.createContext();
+
+export const useTimer = () => {
+  return useContext(TimerContext);
+}
+
+const NextBlockTimer = ({ children }) => {
+  const { isStarted, pauseReader } = useControl();
+  const { wordsPerBlock, wpmSpeed } = useSelectValue();
+  const { selectedID, selectBlock } = useSelectedBlock();
+  const blockGroup = useBlockGroup();
+  
+  const timerRef = useRef(0);
+  const currentTime = useRef(0);
+  const nextTime = useRef(0);
+
+  const readerTimer = useCallback((selectedID) => {
+    if (!currentTime.current) {
+      let newStamp = new Date().getTime();
+      currentTime.current = newStamp;
+      nextTime.current = newStamp;
+    }
+
+    nextTime.current = nextTime.current + CalculateWPM(wpmSpeed, wordsPerBlock);
+
+    const nextBlock = selectedID + 1;
+
+    if (isStarted && nextBlock < blockGroup.length) {
+      selectBlock(nextBlock);
+
+      timerRef.current = setTimeout(() => {
+        readerTimer(selectedID)
+      }, nextTime.current  - new Date().getTime());
+    } else {
+      let endStamp = new Date();
+      console.log(`End: ${endStamp.toString()}`);
+      clearTimeout(timerRef.current);
+      timerRef.current = 0;
+      pauseTimer();
+      pauseReader();
+    }
+  }, [isStarted, nextTime, blockGroup.length, currentTime, selectBlock, wordsPerBlock, wpmSpeed, pauseReader]);
+
+  const startTimer = () => {
+    let startStamp = new Date();
+    console.log(`Start: ${startStamp.toString()}`);
+
+    resetTimer();
+  }
+
+  const pauseTimer = () => {
+    clearTimeout(timerRef.current);
+    timerRef.current = 0;
+    currentTime.current = 0;
+    nextTime.current = 0;
+  }
+
+  const resetTimer = () => {
+    pauseTimer();
+
+    selectBlock(0);
+  }
+
+  useEffect(() => {
+    if (isStarted && timerRef.current === 0) {
+      timerRef.current = setTimeout(() => {
+        readerTimer(selectedID);
+      }, CalculateWPM(wpmSpeed, wordsPerBlock));
+    }
+
+    return () => {
+      clearTimeout(timerRef.current);
+      timerRef.current = 0;
+    }
+  }, [isStarted, selectedID, wordsPerBlock, wpmSpeed, readerTimer]);
+
+  return (
+    <TimerContext.Provider value={{ startTimer, resetTimer }}>
+      {children}
+    </TimerContext.Provider>
+  );
+
+}
+
+export default NextBlockTimer;
